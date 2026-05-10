@@ -14,6 +14,15 @@ ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def upload_storage_is_read_only():
+    return (
+        os.getenv('VERCEL') == '1'
+        or bool(os.getenv('VERCEL_ENV'))
+        or bool(os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
+        or bool(os.getenv('LAMBDA_TASK_ROOT'))
+        or os.path.abspath(Config.UPLOAD_FOLDER).startswith('/var/task')
+    )
+
 @profile_bp.route('/profile')
 @login_required
 def view():
@@ -84,14 +93,17 @@ def edit():
         file = request.files.get('profile_photo')
         image_upload_disabled = False
         if file and file.filename:
-            if os.getenv('VERCEL') == '1':
+            if upload_storage_is_read_only():
                 image_upload_disabled = True
             elif allowed_file(file.filename):
                 filename = secure_filename(f"user_{session['user_id']}_{file.filename}")
                 upload_dir = os.path.join(Config.UPLOAD_FOLDER, 'profiles')
-                os.makedirs(upload_dir, exist_ok=True)
-                file.save(os.path.join(upload_dir, filename))
-                photo_path = f"images/profiles/{filename}"
+                try:
+                    os.makedirs(upload_dir, exist_ok=True)
+                    file.save(os.path.join(upload_dir, filename))
+                    photo_path = f"images/profiles/{filename}"
+                except OSError:
+                    image_upload_disabled = True
             else:
                 flash('Unsupported image format. Please upload JPG, PNG, or WEBP.', 'warning')
 
