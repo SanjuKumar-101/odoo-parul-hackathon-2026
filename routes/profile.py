@@ -82,12 +82,18 @@ def edit():
         # Handle photo upload
         photo_path = user['profile_photo']
         file = request.files.get('profile_photo')
-        if file and file.filename and allowed_file(file.filename):
-            filename = secure_filename(f"user_{session['user_id']}_{file.filename}")
-            upload_dir = os.path.join(Config.UPLOAD_FOLDER, 'profiles')
-            os.makedirs(upload_dir, exist_ok=True)
-            file.save(os.path.join(upload_dir, filename))
-            photo_path = f"images/profiles/{filename}"
+        image_upload_disabled = False
+        if file and file.filename:
+            if os.getenv('VERCEL') == '1':
+                image_upload_disabled = True
+            elif allowed_file(file.filename):
+                filename = secure_filename(f"user_{session['user_id']}_{file.filename}")
+                upload_dir = os.path.join(Config.UPLOAD_FOLDER, 'profiles')
+                os.makedirs(upload_dir, exist_ok=True)
+                file.save(os.path.join(upload_dir, filename))
+                photo_path = f"images/profiles/{filename}"
+            else:
+                flash('Unsupported image format. Please upload JPG, PNG, or WEBP.', 'warning')
 
         cur.execute("""
             UPDATE users SET name=%s, email=%s, tagline=%s, bio=%s,
@@ -96,7 +102,10 @@ def edit():
         mysql.connection.commit()
         session['user_name'] = name
         cur.close()
-        flash('Profile updated successfully.', 'success')
+        if image_upload_disabled:
+            flash('Profile details updated. Image upload is disabled on this deployment.', 'warning')
+        else:
+            flash('Profile updated successfully.', 'success')
         return redirect(url_for('profile.view'))
 
     cur.close()
