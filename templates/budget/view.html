@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block title %}Budget – {{ trip.name }}{% endblock %}
+{% block extra_css %}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h4><i class="bi bi-wallet2 me-2"></i>Budget & Expenses</h4>
+        <small class="text-muted">{{ trip.name }}</small>
+    </div>
+    <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card blue text-center">
+            <div class="small mb-1">Total Budget</div>
+            <div class="fs-4 fw-bold">${{ "%.2f"|format(trip.total_budget) }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card red text-center">
+            <div class="small mb-1">Total Spent</div>
+            <div class="fs-4 fw-bold">${{ "%.2f"|format(total_spent) }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card {% if remaining >= 0 %}green{% else %}red{% endif %} text-center">
+            <div class="small mb-1">Remaining</div>
+            <div class="fs-4 fw-bold">${{ "%.2f"|format(remaining) }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Budget Progress -->
+{% if trip.total_budget > 0 %}
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between mb-1">
+            <small class="fw-semibold">Budget Used</small>
+            <small>{{ "%.1f"|format((total_spent / trip.total_budget * 100)|float) }}%</small>
+        </div>
+        <div class="progress budget-bar">
+            <div class="progress-bar {% if total_spent > trip.total_budget %}bg-danger{% else %}bg-success{% endif %}"
+                 style="width: {{ [total_spent / trip.total_budget * 100, 100]|min }}%"></div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <!-- Add Expense -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-plus-circle me-2"></i>Add Expense</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('budget.add_expense', trip_id=trip.id) }}" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Title *</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Hotel booking" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Amount ($) *</label>
+                        <input type="number" name="amount" class="form-control" placeholder="0.00" min="0" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Category</label>
+                        <select name="category" class="form-select">
+                            <option value="transport">Transport</option>
+                            <option value="accommodation">Accommodation</option>
+                            <option value="food">Food & Dining</option>
+                            <option value="activities">Activities</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="general">General</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Date</label>
+                        <input type="date" name="expense_date" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Notes</label>
+                        <textarea name="notes" class="form-control" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Add Expense</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense List + Chart -->
+    <div class="col-lg-8">
+        {% if by_category %}
+        <div class="card mb-4">
+            <div class="card-header">Spending by Category</div>
+            <div class="card-body" style="max-height:260px;">
+                <canvas id="budgetChart"></canvas>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">Expense Log</div>
+            <div class="card-body p-0">
+                {% if expenses %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for e in expenses %}
+                            <tr>
+                                <td>{{ e.title }}</td>
+                                <td><span class="badge bg-secondary">{{ e.category }}</span></td>
+                                <td>{{ e.expense_date or '—' }}</td>
+                                <td class="fw-semibold text-danger">${{ "%.2f"|format(e.amount) }}</td>
+                                <td>
+                                    <form method="POST"
+                                          action="{{ url_for('budget.delete_expense', trip_id=trip.id, expense_id=e.id) }}"
+                                          data-confirm="Delete this expense?">
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">No expenses recorded yet.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if by_category %}
+<script>
+const ctx = document.getElementById('budgetChart').getContext('2d');
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ by_category | map(attribute='category') | list | tojson }},
+        datasets: [{
+            data: {{ by_category | map(attribute='total') | list | tojson }},
+            backgroundColor: ['#2563eb','#f59e0b','#10b981','#ef4444','#8b5cf6','#6b7280']
+        }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+});
+</script>
+{% endif %}
+{% endblock %}

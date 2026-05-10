@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Edit Trip – Traveloop{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-pencil me-2"></i>Edit Trip</h4>
+    <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+</div>
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">Update Trip Details</div>
+            <div class="card-body">
+                <form method="POST" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Trip Name *</label>
+                        <input type="text" name="name" class="form-control" value="{{ trip.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Main Destination *</label>
+                        <input type="text" name="destination" class="form-control" value="{{ trip.destination }}" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Start Date *</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ trip.start_date }}" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">End Date *</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ trip.end_date }}" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Total Budget ($)</label>
+                        <input type="number" name="total_budget" class="form-control"
+                               value="{{ trip.total_budget }}" min="0" step="0.01">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea name="description" class="form-control" rows="3">{{ trip.description or '' }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

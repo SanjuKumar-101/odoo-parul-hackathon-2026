@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}{{ trip.name }} – Shared Itinerary{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h4><i class="bi bi-share me-2"></i>{{ trip.name }}</h4>
+        <small class="text-muted">
+            <i class="bi bi-geo-alt me-1"></i>{{ trip.destination }} &nbsp;|&nbsp;
+            {{ trip.start_date }} → {{ trip.end_date }}
+        </small>
+    </div>
+</div>
+
+{% if trip.description %}
+<div class="card mb-4">
+    <div class="card-body text-muted">{{ trip.description }}</div>
+</div>
+{% endif %}
+
+{% if days %}
+    {% for day in days %}
+    <div class="card mb-3">
+        <div class="card-header">
+            Day {{ day.day_number }} – {{ day.day_date }}
+            {% if day.city %}<span class="ms-2 badge bg-light text-dark">{{ day.city }}</span>{% endif %}
+        </div>
+        <div class="card-body">
+            {% if day['items'] %}
+                {% for item in day['items'] %}
+                <div class="timeline-item d-flex justify-content-between">
+                    <div>
+                        <span class="fw-semibold">{{ item.title }}</span>
+                        <span class="badge bg-secondary ms-2 small">{{ item.category }}</span>
+                        {% if item.start_time %}
+                        <div class="text-muted small">{{ item.start_time }}{% if item.end_time %} – {{ item.end_time }}{% endif %}</div>
+                        {% endif %}
+                    </div>
+                    <span class="text-success fw-semibold">${{ "%.2f"|format(item.cost) }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+            <p class="text-muted small mb-0">No activities for this day.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="text-center py-5 text-muted">
+    <i class="bi bi-calendar-x fs-1"></i>
+    <p class="mt-3">No itinerary available for this trip.</p>
+</div>
+{% endif %}
+{% endblock %}

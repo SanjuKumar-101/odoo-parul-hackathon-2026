@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}Itinerary Builder – Traveloop{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h4><i class="bi bi-calendar3 me-2"></i>Itinerary Builder</h4>
+        <small class="text-muted">{{ trip.name }} &nbsp;|&nbsp; {{ trip.start_date }} → {{ trip.end_date }}</small>
+    </div>
+    <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Trip
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Add Day Form -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-plus-circle me-2"></i>Add Day</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('itinerary.add_day', trip_id=trip.id) }}" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Date *</label>
+                        <input type="date" name="day_date" class="form-control"
+                               min="{{ trip.start_date }}" max="{{ trip.end_date }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">City</label>
+                        <input type="text" name="city" class="form-control" placeholder="e.g. Paris">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Notes</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Add Day</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Days Timeline -->
+    <div class="col-lg-8">
+        {% if days %}
+            {% for day in days %}
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="bi bi-calendar-day me-2"></i>
+                        Day {{ day.day_number }} – {{ day.day_date }}
+                        {% if day.city %}<span class="ms-2 badge bg-light text-dark">{{ day.city }}</span>{% endif %}
+                    </span>
+                    <form method="POST" action="{{ url_for('itinerary.delete_day', day_id=day.id) }}"
+                          data-confirm="Remove this day and all its activities?">
+                        <button class="btn btn-sm btn-outline-light"><i class="bi bi-trash"></i></button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <!-- Existing items -->
+                    {% if day['items'] %}
+                    <div class="mb-3">
+                        {% for item in day['items'] %}
+                        <div class="timeline-item d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="fw-semibold">{{ item.title }}</span>
+                                <span class="badge bg-secondary ms-2 small">{{ item.category }}</span>
+                                {% if item.start_time %}
+                                <div class="text-muted small">
+                                    {{ item.start_time }}{% if item.end_time %} – {{ item.end_time }}{% endif %}
+                                </div>
+                                {% endif %}
+                                {% if item.description %}
+                                <div class="text-muted small">{{ item.description }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-success fw-semibold">${{ "%.2f"|format(item.cost) }}</span>
+                                <form method="POST" action="{{ url_for('itinerary.delete_item', item_id=item.id) }}"
+                                      data-confirm="Remove this activity?">
+                                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Add Activity Form -->
+                    <button class="btn btn-sm btn-outline-primary mb-2" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#addItem{{ day.id }}">
+                        <i class="bi bi-plus me-1"></i>Add Activity
+                    </button>
+                    <div class="collapse" id="addItem{{ day.id }}">
+                        <form method="POST" action="{{ url_for('itinerary.add_item', day_id=day.id) }}"
+                              class="border rounded p-3 bg-light" novalidate>
+                            <div class="row g-2">
+                                <div class="col-12">
+                                    <input type="text" name="title" class="form-control form-control-sm"
+                                           placeholder="Activity title *" required>
+                                </div>
+                                <div class="col-6">
+                                    <input type="time" name="start_time" class="form-control form-control-sm"
+                                           placeholder="Start time">
+                                </div>
+                                <div class="col-6">
+                                    <input type="time" name="end_time" class="form-control form-control-sm"
+                                           placeholder="End time">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" name="cost" class="form-control form-control-sm"
+                                           placeholder="Cost ($)" min="0" step="0.01" value="0">
+                                </div>
+                                <div class="col-6">
+                                    <select name="category" class="form-select form-select-sm">
+                                        <option value="general">General</option>
+                                        <option value="transport">Transport</option>
+                                        <option value="food">Food</option>
+                                        <option value="sightseeing">Sightseeing</option>
+                                        <option value="accommodation">Accommodation</option>
+                                        <option value="adventure">Adventure</option>
+                                        <option value="leisure">Leisure</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <textarea name="description" class="form-control form-control-sm"
+                                              rows="2" placeholder="Description (optional)"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-sm btn-success w-100">
+                                        <i class="bi bi-check me-1"></i>Save Activity
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5 text-muted">
+                <i class="bi bi-calendar-plus fs-1"></i>
+                <p class="mt-3">No days added yet. Use the form to add your first day!</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

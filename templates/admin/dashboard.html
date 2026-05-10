@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard – Traveloop{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h4>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card blue text-center">
+            <div class="fs-2 fw-bold">{{ total_users }}</div>
+            <div class="small">Total Users</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card amber text-center">
+            <div class="fs-2 fw-bold">{{ total_trips }}</div>
+            <div class="small">Total Trips</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card green text-center">
+            <div class="fs-2 fw-bold">${{ "%.0f"|format(total_budget) }}</div>
+            <div class="small">Total Budget</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card red text-center">
+            <div class="fs-2 fw-bold">{{ top_cities|length }}</div>
+            <div class="small">Active Cities</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Trip Status Chart -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Trips by Status</div>
+            <div class="card-body" style="max-height:260px;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trips by Month Chart -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Trips Created (Last 6 Months)</div>
+            <div class="card-body" style="max-height:260px;">
+                <canvas id="monthChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Top Cities -->
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">Top Destinations</div>
+            <div class="card-body p-0">
+                {% if top_cities %}
+                <div class="list-group list-group-flush">
+                    {% for city in top_cities %}
+                    <div class="list-group-item d-flex justify-content-between">
+                        <span>{{ city.name }}</span>
+                        <span class="badge bg-primary">{{ city.trip_count }} trips</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-3 text-muted small">No data yet.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">User Overview</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Trips</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr>
+                                <td>{{ u.name }}</td>
+                                <td class="text-muted small">{{ u.email }}</td>
+                                <td><span class="badge bg-secondary">{{ u.trip_count }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Status Chart
+new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+        labels: {{ trip_by_status | map(attribute='status') | list | tojson }},
+        datasets: [{
+            data: {{ trip_by_status | map(attribute='cnt') | list | tojson }},
+            backgroundColor: ['#2563eb', '#10b981', '#6b7280']
+        }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+});
+
+// Month Chart
+new Chart(document.getElementById('monthChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ trips_by_month | map(attribute='month') | list | tojson }},
+        datasets: [{
+            label: 'Trips',
+            data: {{ trips_by_month | map(attribute='cnt') | list | tojson }},
+            backgroundColor: '#2563eb'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+</script>
+{% endblock %}

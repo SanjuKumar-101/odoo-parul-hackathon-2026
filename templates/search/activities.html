@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Activities – Traveloop{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-binoculars me-2"></i>Browse Activities</h4>
+    <a href="{{ url_for('search.search_cities') }}" class="btn btn-outline-secondary btn-sm">Back to Cities</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-2">
+            <div class="col-md-4">
+                <input type="text" name="q" class="form-control" placeholder="Search activity..." value="{{ query }}">
+            </div>
+            <div class="col-md-3">
+                <select name="city_id" class="form-select">
+                    <option value="">All Cities</option>
+                    {% for city in cities %}
+                    <option value="{{ city.id }}" {% if city.id|string == selected_city %}selected{% endif %}>
+                        {{ city.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>
+                        {{ cat|capitalize }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3">
+    {% for act in activities %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="fw-bold mb-0">{{ act.name }}</h6>
+                    <span class="badge bg-secondary">{{ act.category }}</span>
+                </div>
+                <p class="text-muted small mb-1"><i class="bi bi-geo-alt me-1"></i>{{ act.city_name }}</p>
+                <p class="text-muted small mb-1"><i class="bi bi-clock me-1"></i>{{ act.duration_hours }}h</p>
+                <p class="text-success fw-semibold mb-2">${{ "%.2f"|format(act.cost) }}</p>
+                {% if act.description %}
+                <p class="text-muted small">{{ act.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-muted py-5">
+        <i class="bi bi-search fs-1"></i>
+        <p class="mt-3">No activities found.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
