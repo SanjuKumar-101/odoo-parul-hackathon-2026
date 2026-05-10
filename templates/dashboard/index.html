@@ -1,100 +1,133 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard – Traveloop{% endblock %}
+{% block title %}Dashboard - Traveloop{% endblock %}
 {% block content %}
-<div class="page-header">
-    <h4><i class="bi bi-house me-2"></i>Dashboard</h4>
-    <a href="{{ url_for('trips.create_trip') }}" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-circle me-1"></i>Plan New Trip
-    </a>
-</div>
+<section class="dashboard-hero mb-4">
+    <div>
+        <span class="hero-kicker">
+            <i class="bi bi-compass"></i>
+            Travel workspace
+        </span>
+        <h1>Welcome back{% if session.user_name %}, {{ session.user_name }}{% endif %}</h1>
+        <p>Keep your trips, budgets, destinations, and next actions organized in one polished planning view.</p>
+    </div>
+    <div class="hero-actions">
+        <a href="{{ url_for('search.search_cities') }}" class="btn btn-light">
+            <i class="bi bi-search me-1"></i>Explore
+        </a>
+        <a href="{{ url_for('trips.create_trip') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Plan New Trip
+        </a>
+    </div>
+</section>
 
-<!-- Stats Row -->
 <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-        <div class="stat-card blue text-center">
-            <div class="fs-2 fw-bold">{{ total_trips }}</div>
-            <div class="small">Total Trips</div>
+    <div class="col-6 col-lg-3">
+        <div class="dashboard-stat-card">
+            <span class="stat-icon"><i class="bi bi-map"></i></span>
+            <div class="stat-value">{{ total_trips }}</div>
+            <div class="stat-label">Total trips</div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-card amber text-center">
-            <div class="fs-2 fw-bold">{{ upcoming }}</div>
-            <div class="small">Upcoming</div>
+    <div class="col-6 col-lg-3">
+        <div class="dashboard-stat-card">
+            <span class="stat-icon"><i class="bi bi-calendar-event"></i></span>
+            <div class="stat-value">{{ upcoming }}</div>
+            <div class="stat-label">Upcoming</div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-card green text-center">
-            <div class="fs-2 fw-bold">{{ completed }}</div>
-            <div class="small">Completed</div>
+    <div class="col-6 col-lg-3">
+        <div class="dashboard-stat-card">
+            <span class="stat-icon"><i class="bi bi-check2-circle"></i></span>
+            <div class="stat-value">{{ completed }}</div>
+            <div class="stat-label">Completed</div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-card red text-center">
-            <div class="fs-2 fw-bold">{{ total_trips - upcoming - completed }}</div>
-            <div class="small">Ongoing</div>
+    <div class="col-6 col-lg-3">
+        <div class="dashboard-stat-card">
+            <span class="stat-icon"><i class="bi bi-arrow-repeat"></i></span>
+            <div class="stat-value">{{ total_trips - upcoming - completed }}</div>
+            <div class="stat-label">Ongoing</div>
         </div>
     </div>
 </div>
 
 <div class="row g-4">
-    <!-- Recent Trips -->
     <div class="col-lg-7">
-        <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-clock-history me-2"></i>Recent Trips</span>
+        <section class="card dashboard-panel h-100">
+            <div class="card-header dashboard-panel-header">
+                <div>
+                    <span class="section-kicker">Recent activity</span>
+                    <h2>Recent Trips</h2>
+                </div>
                 <a href="{{ url_for('trips.list_trips') }}" class="btn btn-sm btn-light">View All</a>
             </div>
             <div class="card-body p-0">
                 {% if recent_trips %}
-                <div class="list-group list-group-flush">
+                <div class="dashboard-trip-list">
                     {% for trip in recent_trips %}
-                    <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}"
-                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="fw-semibold">{{ trip.name }}</div>
-                            <small class="text-muted">
-                                <i class="bi bi-geo-alt me-1"></i>{{ trip.destination }}
-                                &nbsp;|&nbsp;
-                                <i class="bi bi-calendar me-1"></i>{{ trip.start_date }}
-                            </small>
-                        </div>
+                    <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="dashboard-trip-row">
+                        <span class="trip-row-icon"><i class="bi bi-airplane"></i></span>
+                        <span class="trip-row-main">
+                            <span class="trip-row-title">{{ trip.name }}</span>
+                            <span class="trip-row-meta">
+                                <i class="bi bi-geo-alt"></i>{{ trip.destination }}
+                                <span class="meta-divider"></span>
+                                <i class="bi bi-calendar"></i>{{ trip.start_date }}
+                            </span>
+                        </span>
                         <span class="badge badge-{{ trip.status }} text-white rounded-pill">{{ trip.status }}</span>
                     </a>
                     {% endfor %}
                 </div>
                 {% else %}
-                <div class="text-center py-5 text-muted">
-                    <i class="bi bi-map fs-1"></i>
-                    <p class="mt-2">No trips yet. <a href="{{ url_for('trips.create_trip') }}">Plan one!</a></p>
+                <div class="empty-state">
+                    <span class="empty-icon"><i class="bi bi-map"></i></span>
+                    <h3>No trips yet</h3>
+                    <p>Create your first trip and Traveloop will keep the plan organized from start to finish.</p>
+                    <a href="{{ url_for('trips.create_trip') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i>Plan your first trip
+                    </a>
                 </div>
                 {% endif %}
             </div>
-        </div>
+        </section>
     </div>
 
-    <!-- Popular Cities -->
     <div class="col-lg-5">
-        <div class="card h-100">
-            <div class="card-header"><i class="bi bi-globe me-2"></i>Popular Destinations</div>
+        <section class="card dashboard-panel h-100">
+            <div class="card-header dashboard-panel-header">
+                <div>
+                    <span class="section-kicker">Inspiration</span>
+                    <h2>Popular Destinations</h2>
+                </div>
+                <a href="{{ url_for('search.search_cities') }}" class="btn btn-sm btn-light">Explore</a>
+            </div>
             <div class="card-body">
-                <div class="row g-2">
+                {% if popular_cities %}
+                <div class="destination-grid">
                     {% for city in popular_cities %}
-                    <div class="col-6">
-                        <div class="border rounded overflow-hidden trip-card" style="height:100px;">
-                            {% if city.image_url %}
-                            <img src="{{ url_for('static', filename=city.image_url) }}"
-                                 style="width:100%;height:60px;object-fit:cover;">
-                            {% endif %}
-                            <div class="p-1 text-center">
-                                <div class="fw-semibold small">{{ city.name }}</div>
-                                <div class="text-muted" style="font-size:0.7rem;">{{ city.country }}</div>
-                            </div>
+                    <article class="destination-card">
+                        {% if city.image_url %}
+                        <img src="{{ url_for('static', filename=city.image_url) }}" alt="{{ city.name }}">
+                        {% else %}
+                        <div class="destination-fallback">{{ city.name[:1] }}</div>
+                        {% endif %}
+                        <div class="destination-overlay">
+                            <div class="fw-bold">{{ city.name }}</div>
+                            <small>{{ city.country }}</small>
                         </div>
-                    </div>
+                    </article>
                     {% endfor %}
                 </div>
+                {% else %}
+                <div class="empty-state compact">
+                    <span class="empty-icon"><i class="bi bi-globe2"></i></span>
+                    <h3>No destinations yet</h3>
+                    <p>Add cities from the admin panel to showcase destination inspiration here.</p>
+                </div>
+                {% endif %}
             </div>
-        </div>
+        </section>
     </div>
 </div>
 {% endblock %}
