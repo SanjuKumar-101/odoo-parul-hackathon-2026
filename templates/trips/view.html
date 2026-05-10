@@ -1,114 +1,151 @@
 {% extends 'base.html' %}
-{% block title %}{{ trip.name }} – Traveloop{% endblock %}
+{% block title %}{{ trip.name }} - Traveloop{% endblock %}
 {% block content %}
-<div class="page-header">
+<section class="trip-detail-hero mb-4">
     <div>
-        <h4><i class="bi bi-map me-2"></i>{{ trip.name }}</h4>
-        <small class="text-muted">
-            <i class="bi bi-geo-alt me-1"></i>{{ trip.destination }} &nbsp;|&nbsp;
-            <i class="bi bi-calendar-range me-1"></i>{{ trip.start_date }} → {{ trip.end_date }}
-        </small>
+        <span class="hero-kicker">
+            <i class="bi bi-geo-alt"></i>
+            {{ trip.destination }}
+        </span>
+        <h1>{{ trip.name }}</h1>
+        <p>
+            <i class="bi bi-calendar-range me-1"></i>{{ trip.start_date }} to {{ trip.end_date }}
+            <span class="badge badge-{{ trip.status }} text-white rounded-pill ms-2">{{ trip.status }}</span>
+        </p>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
-        <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}" class="btn btn-primary btn-sm">
+    <div class="trip-detail-actions">
+        <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}" class="btn btn-primary">
             <i class="bi bi-calendar3 me-1"></i>Edit Itinerary
         </a>
-        <a href="{{ url_for('itinerary.view', trip_id=trip.id) }}" class="btn btn-outline-primary btn-sm">
+        <a href="{{ url_for('itinerary.view', trip_id=trip.id) }}" class="btn btn-light">
             <i class="bi bi-eye me-1"></i>View Itinerary
         </a>
-        <a href="{{ url_for('itinerary.view', trip_id=trip.id) }}#budget" class="btn btn-outline-success btn-sm">
-            <i class="bi bi-wallet2 me-1"></i>Budget
-        </a>
-        <a href="{{ url_for('checklist.view', trip_id=trip.id) }}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-check2-square me-1"></i>Checklist
-        </a>
-        <a href="{{ url_for('notes.view', trip_id=trip.id) }}" class="btn btn-outline-info btn-sm">
-            <i class="bi bi-journal me-1"></i>Notes
-        </a>
-        <a href="{{ url_for('trips.edit_trip', trip_id=trip.id) }}" class="btn btn-outline-warning btn-sm">
+        <a href="{{ url_for('trips.edit_trip', trip_id=trip.id) }}" class="btn btn-light">
             <i class="bi bi-pencil me-1"></i>Edit
         </a>
     </div>
+</section>
+
+<div class="quick-action-strip mb-4">
+    <a href="{{ url_for('itinerary.view', trip_id=trip.id) }}#budget">
+        <i class="bi bi-wallet2"></i>
+        Budget
+    </a>
+    <a href="{{ url_for('checklist.view', trip_id=trip.id) }}">
+        <i class="bi bi-check2-square"></i>
+        Checklist
+    </a>
+    <a href="{{ url_for('notes.view', trip_id=trip.id) }}">
+        <i class="bi bi-journal"></i>
+        Notes
+    </a>
 </div>
 
 <div class="row g-4">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">Trip Summary</div>
+    <div class="col-lg-4">
+        <aside class="card trip-summary-card">
+            <div class="card-header">
+                <span><i class="bi bi-info-circle me-2"></i>Trip Summary</span>
+            </div>
             <div class="card-body">
-                <p><strong>Status:</strong>
-                    <span class="badge badge-{{ trip.status }} text-white">{{ trip.status }}</span>
-                </p>
-                <p><strong>Budget:</strong> ${{ "%.2f"|format(trip.total_budget) }}</p>
-                <p><strong>Spent:</strong> ${{ "%.2f"|format(spent) }}</p>
-                <p><strong>Remaining:</strong>
-                    <span class="{% if trip.total_budget - spent < 0 %}text-danger{% else %}text-success{% endif %} fw-bold">
-                        ${{ "%.2f"|format(trip.total_budget - spent) }}
-                    </span>
-                </p>
+                <div class="summary-money-grid">
+                    <div>
+                        <span>Budget</span>
+                        <strong>${{ "%.2f"|format(trip.total_budget) }}</strong>
+                    </div>
+                    <div>
+                        <span>Spent</span>
+                        <strong>${{ "%.2f"|format(spent) }}</strong>
+                    </div>
+                    <div class="summary-remaining">
+                        <span>Remaining</span>
+                        <strong class="{% if trip.total_budget - spent < 0 %}text-danger{% else %}text-success{% endif %}">
+                            ${{ "%.2f"|format(trip.total_budget - spent) }}
+                        </strong>
+                    </div>
+                </div>
+
                 {% if trip.description %}
-                <hr>
-                <p class="text-muted small">{{ trip.description }}</p>
+                <div class="trip-description">
+                    <span class="section-kicker">Notes</span>
+                    <p>{{ trip.description }}</p>
+                </div>
                 {% endif %}
-                <hr>
-                <form method="POST" action="{{ url_for('trips.toggle_public', trip_id=trip.id) }}">
-                    <button class="btn btn-sm {% if trip.is_public %}btn-success{% else %}btn-outline-secondary{% endif %} w-100">
+
+                <form method="POST" action="{{ url_for('trips.toggle_public', trip_id=trip.id) }}" class="mt-3">
+                    <button class="btn {% if trip.is_public %}btn-success{% else %}btn-light{% endif %} w-100">
                         <i class="bi bi-{% if trip.is_public %}globe{% else %}lock{% endif %} me-1"></i>
-                        {% if trip.is_public %}Public{% else %}Private{% endif %}
+                        {% if trip.is_public %}Public itinerary{% else %}Private itinerary{% endif %}
                     </button>
                 </form>
+
                 {% if trip.is_public %}
-                <div class="mt-2">
-                    <small class="text-muted">Share link:</small>
-                    <input class="form-control form-control-sm mt-1" readonly
+                <div class="share-link-box mt-3">
+                    <label class="form-label fw-semibold">Share link</label>
+                    <input class="form-control form-control-sm" readonly
                            value="{{ request.host_url }}trips/share/{{ trip.share_token }}">
                 </div>
                 {% endif %}
             </div>
-        </div>
+        </aside>
     </div>
 
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">Itinerary Overview</div>
+    <div class="col-lg-8">
+        <section class="card itinerary-overview-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-signpost-split me-2"></i>Itinerary Overview</span>
+                <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}" class="btn btn-sm btn-light">Manage</a>
+            </div>
             <div class="card-body">
                 {% if days %}
+                <div class="trip-timeline">
                     {% for day in days %}
-                    <div class="timeline-day">
-                        <div class="d-flex justify-content-between mb-2">
-                            <strong>Day {{ day.day_number }} – {{ day.day_date }}
-                                {% if day.city %}<span class="text-muted small">({{ day.city }})</span>{% endif %}
-                            </strong>
-                        </div>
-                        {% if day['items'] %}
-                            {% for item in day['items'] %}
-                            <div class="timeline-item">
-                                <div class="d-flex justify-content-between">
-                                    <span class="fw-semibold">{{ item.title }}</span>
-                                    <span class="text-success small">${{ "%.2f"|format(item.cost) }}</span>
-                                </div>
-                                {% if item.start_time %}
-                                <small class="text-muted">{{ item.start_time }}
-                                    {% if item.end_time %} – {{ item.end_time }}{% endif %}
-                                </small>
-                                {% endif %}
+                    <section class="trip-timeline-day">
+                        <div class="timeline-day-header">
+                            <div>
+                                <span class="day-number">Day {{ day.day_number }}</span>
+                                <h2>{{ day.day_date }}</h2>
                             </div>
+                            {% if day.city %}
+                            <span class="day-city"><i class="bi bi-geo-alt me-1"></i>{{ day.city }}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if day['items'] %}
+                        <div class="timeline-activity-list">
+                            {% for item in day['items'] %}
+                            <article class="timeline-activity">
+                                <div>
+                                    <h3>{{ item.title }}</h3>
+                                    {% if item.start_time %}
+                                    <small>
+                                        <i class="bi bi-clock me-1"></i>{{ item.start_time }}
+                                        {% if item.end_time %} to {{ item.end_time }}{% endif %}
+                                    </small>
+                                    {% endif %}
+                                </div>
+                                <span>${{ "%.2f"|format(item.cost) }}</span>
+                            </article>
                             {% endfor %}
+                        </div>
                         {% else %}
-                            <p class="text-muted small">No activities added.</p>
+                        <p class="timeline-empty">No activities added for this day.</p>
                         {% endif %}
-                    </div>
+                    </section>
                     {% endfor %}
+                </div>
                 {% else %}
-                    <div class="text-center py-4 text-muted">
-                        <i class="bi bi-calendar-x fs-2"></i>
-                        <p class="mt-2">No itinerary yet.
-                            <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}">Build one!</a>
-                        </p>
-                    </div>
+                <div class="empty-state">
+                    <span class="empty-icon"><i class="bi bi-calendar-x"></i></span>
+                    <h3>No itinerary yet</h3>
+                    <p>Start adding days and activities to turn this trip into a clear travel plan.</p>
+                    <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}" class="btn btn-primary btn-sm">
+                        Build itinerary
+                    </a>
+                </div>
                 {% endif %}
             </div>
-        </div>
+        </section>
     </div>
 </div>
 {% endblock %}

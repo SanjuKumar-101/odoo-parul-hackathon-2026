@@ -1,49 +1,100 @@
 {% extends 'base.html' %}
-{% block title %}Edit Trip – Traveloop{% endblock %}
+{% block title %}Edit Trip - Traveloop{% endblock %}
 {% block content %}
-<div class="page-header">
-    <h4><i class="bi bi-pencil me-2"></i>Edit Trip</h4>
-    <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
-</div>
-<div class="row justify-content-center">
-    <div class="col-lg-7">
-        <div class="card">
-            <div class="card-header">Update Trip Details</div>
-            <div class="card-body">
+<section class="trips-hero mb-4">
+    <div>
+        <span class="hero-kicker">
+            <i class="bi bi-pencil"></i>
+            Update travel plan
+        </span>
+        <h1>Edit Trip</h1>
+        <p>Adjust the main details for {{ trip.name }} while keeping the itinerary, budget, checklist, and notes connected.</p>
+    </div>
+    <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="btn btn-light">
+        <i class="bi bi-arrow-left me-1"></i>Cancel
+    </a>
+</section>
+
+<div class="row g-4 justify-content-center">
+    <div class="col-lg-8">
+        <section class="card trip-summary-card">
+            <div class="card-header">
+                <span><i class="bi bi-map me-2"></i>Update Trip Details</span>
+            </div>
+            <div class="card-body p-4">
                 <form method="POST" novalidate>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Trip Name *</label>
-                        <input type="text" name="name" class="form-control" value="{{ trip.name }}" required>
+                        <label class="form-label fw-semibold" for="name">Trip Name *</label>
+                        <input type="text" id="name" name="name" class="form-control" value="{{ trip.name }}" required>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Main Destination *</label>
-                        <input type="text" name="destination" class="form-control"
+                        <label class="form-label fw-semibold" for="destination">Main Destination *</label>
+                        <input type="text" id="destination" name="destination" class="form-control"
                                value="{{ trip.destination }}" data-city-autocomplete required>
-                        <small class="text-muted">Start typing to see available cities.</small>
+                        <div class="form-text">Start typing to choose from available cities.</div>
                     </div>
+
                     <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">Start Date *</label>
-                            <input type="date" name="start_date" class="form-control" value="{{ trip.start_date }}" required>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="start_date">Start Date *</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control" value="{{ trip.start_date }}" required>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">End Date *</label>
-                            <input type="date" name="end_date" class="form-control" value="{{ trip.end_date }}" required>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="end_date">End Date *</label>
+                            <input type="date" id="end_date" name="end_date" class="form-control" value="{{ trip.end_date }}" required>
                         </div>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Total Budget ($)</label>
-                        <input type="number" name="total_budget" class="form-control"
+                        <label class="form-label fw-semibold" for="total_budget">Total Budget ($)</label>
+                        <input type="number" id="total_budget" name="total_budget" class="form-control"
                                value="{{ trip.total_budget }}" min="0" step="0.01">
+                        <div class="form-text">Changing this updates the budget baseline used across the trip.</div>
                     </div>
+
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">Description</label>
-                        <textarea name="description" class="form-control" rows="3">{{ trip.description or '' }}</textarea>
+                        <label class="form-label fw-semibold" for="description">Description</label>
+                        <textarea id="description" name="description" class="form-control" rows="4">{{ trip.description or '' }}</textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 fw-semibold">Save Changes</button>
+
+                    <div class="d-flex flex-column flex-sm-row gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">
+                            <i class="bi bi-check-circle me-2"></i>Save Changes
+                        </button>
+                        <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="btn btn-light">Cancel</a>
+                    </div>
                 </form>
             </div>
-        </div>
+        </section>
+    </div>
+
+    <div class="col-lg-4">
+        <aside class="card trip-summary-card h-100">
+            <div class="card-header">
+                <span><i class="bi bi-link-45deg me-2"></i>Connected tools</span>
+            </div>
+            <div class="card-body">
+                <div class="quick-action-strip">
+                    <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}">
+                        <i class="bi bi-calendar3"></i>
+                        Itinerary
+                    </a>
+                    <a href="{{ url_for('itinerary.view', trip_id=trip.id) }}#budget">
+                        <i class="bi bi-wallet2"></i>
+                        Budget
+                    </a>
+                    <a href="{{ url_for('checklist.view', trip_id=trip.id) }}">
+                        <i class="bi bi-check2-square"></i>
+                        Checklist
+                    </a>
+                    <a href="{{ url_for('notes.view', trip_id=trip.id) }}">
+                        <i class="bi bi-journal"></i>
+                        Notes
+                    </a>
+                </div>
+            </div>
+        </aside>
     </div>
 </div>
 {% endblock %}

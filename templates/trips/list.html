@@ -1,85 +1,91 @@
 {% extends 'base.html' %}
-{% block title %}My Trips – Traveloop{% endblock %}
+{% block title %}My Trips - Traveloop{% endblock %}
 {% block content %}
-<div class="page-header">
-    <h4><i class="bi bi-map me-2"></i>My Trips</h4>
-    <a href="{{ url_for('trips.create_trip') }}" class="btn btn-primary btn-sm">
+<section class="trips-hero mb-4">
+    <div>
+        <span class="hero-kicker">
+            <i class="bi bi-map"></i>
+            Trip library
+        </span>
+        <h1>My Trips</h1>
+        <p>Review upcoming plans, track budgets, and jump back into itinerary building without losing context.</p>
+    </div>
+    <a href="{{ url_for('trips.create_trip') }}" class="btn btn-primary">
         <i class="bi bi-plus-circle me-1"></i>New Trip
     </a>
-</div>
+</section>
 
-<!-- Filter Tabs -->
-<ul class="nav nav-pills mb-4">
+<nav class="filter-pills mb-4" aria-label="Trip status filters">
     {% for s in ['all', 'upcoming', 'ongoing', 'completed'] %}
-    <li class="nav-item">
-        <a class="nav-link {% if status_filter == s %}active{% endif %}"
-           href="{{ url_for('trips.list_trips', status=s) }}">
-            {{ s|capitalize }}
-        </a>
-    </li>
+    <a class="filter-pill {% if status_filter == s %}active{% endif %}"
+       href="{{ url_for('trips.list_trips', status=s) }}">
+        {{ s|capitalize }}
+    </a>
     {% endfor %}
-</ul>
+</nav>
 
 {% if trips %}
-<div class="row g-3">
+<div class="row g-4">
     {% for trip in trips %}
     {% set budget = trip.total_budget|float %}
     {% set spent = trip.spent|float if trip.spent else 0 %}
     {% set pct = [(spent / budget * 100)|int, 100]|min if budget > 0 else 0 %}
-    <div class="col-md-6 col-lg-4">
-        <div class="card trip-card h-100">
-            <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h6 class="fw-bold mb-0">{{ trip.name }}</h6>
-                    <span class="badge badge-{{ trip.status }} text-white">{{ trip.status }}</span>
-                </div>
-                <p class="text-muted small mb-1">
-                    <i class="bi bi-geo-alt me-1"></i>{{ trip.destination }}
-                </p>
-                <p class="text-muted small mb-1">
-                    <i class="bi bi-calendar-range me-1"></i>
-                    {{ trip.start_date }} → {{ trip.end_date }}
-                </p>
+    <div class="col-md-6 col-xl-4">
+        <article class="card trip-library-card h-100">
+            <div class="trip-card-top">
+                <span class="trip-card-icon"><i class="bi bi-airplane"></i></span>
+                <span class="badge badge-{{ trip.status }} text-white rounded-pill">{{ trip.status }}</span>
+            </div>
 
-                <!-- Budget Progress -->
-                <div class="mt-2 mb-3">
-                    <div class="d-flex justify-content-between mb-1">
-                        <small class="text-muted fw-semibold">Budget</small>
-                        <small class="text-muted">${{ "%.0f"|format(spent) }} / ${{ "%.0f"|format(budget) }}</small>
+            <div class="card-body d-flex flex-column">
+                <h2>{{ trip.name }}</h2>
+                <div class="trip-card-meta">
+                    <span><i class="bi bi-geo-alt"></i>{{ trip.destination }}</span>
+                    <span><i class="bi bi-calendar-range"></i>{{ trip.start_date }} to {{ trip.end_date }}</span>
+                </div>
+
+                <div class="trip-budget-block">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="budget-label">Budget used</span>
+                        <span class="budget-value">${{ "%.0f"|format(spent) }} / ${{ "%.0f"|format(budget) }}</span>
                     </div>
-                    <div class="progress" style="height:6px;border-radius:3px;">
-                        <div class="progress-bar {% if pct >= 90 %}bg-danger{% elif pct >= 70 %}bg-warning{% else %}bg-success{% endif %}"
+                    <div class="progress trip-progress">
+                        <div class="progress-bar {% if pct >= 90 %}bg-danger{% elif pct >= 70 %}bg-warning{% else %}bg-primary{% endif %}"
                              style="width:{{ pct }}%"></div>
                     </div>
                     <small class="text-muted">{{ pct }}% used</small>
                 </div>
 
-                <div class="d-flex gap-2 flex-wrap mt-auto">
-                    <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="btn btn-sm btn-outline-primary">
+                <div class="trip-card-actions mt-auto">
+                    <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="btn btn-sm btn-primary">
                         <i class="bi bi-eye me-1"></i>View
                     </a>
-                    <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}" class="btn btn-sm btn-light">
                         <i class="bi bi-calendar3 me-1"></i>Itinerary
                     </a>
-                    <a href="{{ url_for('trips.edit_trip', trip_id=trip.id) }}" class="btn btn-sm btn-outline-warning">
-                        <i class="bi bi-pencil me-1"></i>Edit
+                    <a href="{{ url_for('trips.edit_trip', trip_id=trip.id) }}" class="btn btn-sm btn-light" aria-label="Edit {{ trip.name }}">
+                        <i class="bi bi-pencil"></i>
                     </a>
                     <form method="POST" action="{{ url_for('trips.delete_trip', trip_id=trip.id) }}"
                           data-confirm="Delete this trip?">
-                        <button class="btn btn-sm btn-outline-danger">
+                        <button class="btn btn-sm btn-light text-danger" aria-label="Delete {{ trip.name }}">
                             <i class="bi bi-trash"></i>
                         </button>
                     </form>
                 </div>
             </div>
-        </div>
+        </article>
     </div>
     {% endfor %}
 </div>
 {% else %}
-<div class="text-center py-5 text-muted">
-    <i class="bi bi-map fs-1"></i>
-    <p class="mt-3">No trips found. <a href="{{ url_for('trips.create_trip') }}">Create your first trip!</a></p>
+<div class="empty-state page-empty">
+    <span class="empty-icon"><i class="bi bi-map"></i></span>
+    <h3>No trips found</h3>
+    <p>Create your first trip to start organizing destinations, dates, budgets, notes, and daily activities.</p>
+    <a href="{{ url_for('trips.create_trip') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>Create your first trip
+    </a>
 </div>
 {% endif %}
 {% endblock %}

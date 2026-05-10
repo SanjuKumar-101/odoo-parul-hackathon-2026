@@ -1,51 +1,101 @@
 {% extends 'base.html' %}
-{% block title %}Create Trip – Traveloop{% endblock %}
+{% block title %}Create Trip - Traveloop{% endblock %}
 {% block content %}
-<div class="page-header">
-    <h4><i class="bi bi-plus-circle me-2"></i>Plan a New Trip</h4>
-    <a href="{{ url_for('trips.list_trips') }}" class="btn btn-outline-secondary btn-sm">Back</a>
-</div>
+<section class="trips-hero mb-4">
+    <div>
+        <span class="hero-kicker">
+            <i class="bi bi-plus-circle"></i>
+            New travel plan
+        </span>
+        <h1>Plan a New Trip</h1>
+        <p>Add the essentials first. You can build days, activities, budgets, notes, and checklists after the trip is created.</p>
+    </div>
+    <a href="{{ url_for('trips.list_trips') }}" class="btn btn-light">
+        <i class="bi bi-arrow-left me-1"></i>Back to Trips
+    </a>
+</section>
 
-<div class="row justify-content-center">
-    <div class="col-lg-7">
-        <div class="card">
-            <div class="card-header">Trip Details</div>
-            <div class="card-body">
+<div class="row g-4 justify-content-center">
+    <div class="col-lg-8">
+        <section class="card trip-summary-card">
+            <div class="card-header">
+                <span><i class="bi bi-map me-2"></i>Trip Details</span>
+            </div>
+            <div class="card-body p-4">
                 <form method="POST" novalidate>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Trip Name *</label>
-                        <input type="text" name="name" class="form-control" placeholder="e.g. Europe Summer 2025" required>
+                        <label class="form-label fw-semibold" for="name">Trip Name *</label>
+                        <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Europe Summer 2026" required>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Main Destination *</label>
-                        <input type="text" name="destination" class="form-control"
+                        <label class="form-label fw-semibold" for="destination">Main Destination *</label>
+                        <input type="text" id="destination" name="destination" class="form-control"
                                placeholder="e.g. Paris, France" data-city-autocomplete required>
-                        <small class="text-muted">Start typing to see available cities.</small>
+                        <div class="form-text">Start typing to choose from available cities.</div>
                     </div>
+
                     <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">Start Date *</label>
-                            <input type="date" name="start_date" class="form-control" required>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="start_date">Start Date *</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control" required>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">End Date *</label>
-                            <input type="date" name="end_date" class="form-control" required>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="end_date">End Date *</label>
+                            <input type="date" id="end_date" name="end_date" class="form-control" required>
                         </div>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Total Budget ($)</label>
-                        <input type="number" name="total_budget" class="form-control" placeholder="0.00" min="0" step="0.01">
+                        <label class="form-label fw-semibold" for="total_budget">Total Budget ($)</label>
+                        <input type="number" id="total_budget" name="total_budget" class="form-control" placeholder="0.00" min="0" step="0.01">
+                        <div class="form-text">Optional, but useful for budget tracking and cost breakdowns.</div>
                     </div>
+
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">Description</label>
-                        <textarea name="description" class="form-control" rows="3" placeholder="What's this trip about?"></textarea>
+                        <label class="form-label fw-semibold" for="description">Description</label>
+                        <textarea id="description" name="description" class="form-control" rows="4" placeholder="What is this trip about?"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
-                        <i class="bi bi-check-circle me-2"></i>Create Trip & Build Itinerary
-                    </button>
+
+                    <div class="d-flex flex-column flex-sm-row gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">
+                            <i class="bi bi-check-circle me-2"></i>Create Trip and Build Itinerary
+                        </button>
+                        <a href="{{ url_for('trips.list_trips') }}" class="btn btn-light">Cancel</a>
+                    </div>
                 </form>
             </div>
-        </div>
+        </section>
+    </div>
+
+    <div class="col-lg-4">
+        <aside class="card trip-summary-card h-100">
+            <div class="card-header">
+                <span><i class="bi bi-stars me-2"></i>What comes next</span>
+            </div>
+            <div class="card-body">
+                <div class="timeline-activity-list">
+                    <div class="timeline-activity">
+                        <div>
+                            <h3>Create the trip</h3>
+                            <small>Save dates, destination, and starting budget.</small>
+                        </div>
+                    </div>
+                    <div class="timeline-activity">
+                        <div>
+                            <h3>Build itinerary days</h3>
+                            <small>Add activities, times, and estimated costs.</small>
+                        </div>
+                    </div>
+                    <div class="timeline-activity">
+                        <div>
+                            <h3>Track the details</h3>
+                            <small>Use checklist, notes, and budget tools as the plan grows.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
 </div>
 {% endblock %}
