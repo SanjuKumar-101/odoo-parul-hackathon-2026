@@ -9,7 +9,7 @@ It helps users plan and manage trips from one centralized platform by allowing t
 ## Live Demo
 
 **Live App:**  
-https://odoo-parul-hackathon-2026-2mr5-694e7z4dt.vercel.app/login
+https://odoo-parul-hackathon-2026.vercel.app/login
 
 **GitHub Repository:**  
 https://github.com/SanjuKumar-101/odoo-parul-hackathon-2026
