@@ -164,6 +164,11 @@ def add_city():
     region = request.form.get('region', '').strip()
     cost_index = request.form.get('cost_index', '1.0').strip()
     popularity = request.form.get('popularity', '0').strip()
+    currency_code = request.form.get('currency_code', 'INR').strip().upper()
+    emergency_police = request.form.get('emergency_police', '').strip()
+    emergency_ambulance = request.form.get('emergency_ambulance', '').strip()
+    emergency_fire = request.form.get('emergency_fire', '').strip()
+    emergency_tourist_helpline = request.form.get('emergency_tourist_helpline', '').strip()
 
     if not name or not country:
         flash('Name and country are required.', 'danger')
@@ -171,9 +176,13 @@ def add_city():
 
     cur = mysql.connection.cursor()
     cur.execute("""
-        INSERT INTO cities (name, country, region, cost_index, popularity)
-        VALUES (%s, %s, %s, %s, %s)
-    """, (name, country, region, float(cost_index), int(popularity)))
+        INSERT INTO cities (name, country, region, cost_index, popularity,
+                            currency_code, emergency_police, emergency_ambulance,
+                            emergency_fire, emergency_tourist_helpline)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (name, country, region, float(cost_index), int(popularity),
+          currency_code, emergency_police, emergency_ambulance,
+          emergency_fire, emergency_tourist_helpline))
     mysql.connection.commit()
     cur.close()
     flash(f'City {name} added.', 'success')

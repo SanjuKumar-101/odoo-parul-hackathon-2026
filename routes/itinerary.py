@@ -12,6 +12,15 @@ def _get_trip_or_404(trip_id):
     cur.close()
     return trip
 
+
+def _get_city_info(city_name):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM cities WHERE LOWER(name) = LOWER(%s)", (city_name,))
+    city = cur.fetchone()
+    cur.close()
+    return city
+
+
 def _get_days_with_items(trip_id):
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM itinerary_days WHERE trip_id = %s ORDER BY day_number", (trip_id,))
@@ -34,7 +43,9 @@ def builder(trip_id):
         flash('Trip not found.', 'danger')
         return redirect(url_for('trips.list_trips'))
     days, total_cost = _get_days_with_items(trip_id)
-    return render_template('itinerary/builder.html', trip=trip, days=days, total_cost=total_cost)
+    city_info = _get_city_info(trip['destination'])
+    return render_template('itinerary/builder.html', trip=trip, days=days,
+                           total_cost=total_cost, city_info=city_info)
 
 @itinerary_bp.route('/trips/<int:trip_id>/itinerary/view')
 @login_required
@@ -71,11 +82,13 @@ def view(trip_id):
     cur.close()
 
     remaining = trip['total_budget'] - total_spent
+    city_info = _get_city_info(trip['destination'])
 
     return render_template('itinerary/view.html', trip=trip, days=days,
                            total_cost=total_cost, category_totals=category_totals,
                            expenses=expenses, total_spent=total_spent,
-                           by_category=by_category, remaining=remaining)
+                           by_category=by_category, remaining=remaining,
+                           city_info=city_info)
 
 @itinerary_bp.route('/trips/<int:trip_id>/itinerary/add_expense', methods=['POST'])
 @login_required
@@ -117,12 +130,17 @@ def add_day(trip_id):
     if not trip:
         return jsonify({'error': 'Not found'}), 404
 
-    city = request.form.get('city', '').strip()
+    requested_city = request.form.get('city', '').strip()
+    city = trip['destination']
     day_date = request.form.get('day_date', '').strip()
     notes = request.form.get('notes', '').strip()
 
     if not day_date:
         flash('Day date is required.', 'danger')
+        return redirect(url_for('itinerary.builder', trip_id=trip_id))
+
+    if requested_city and requested_city.lower() != trip['destination'].lower():
+        flash(f'Itinerary city must match this trip destination: {trip["destination"]}.', 'danger')
         return redirect(url_for('itinerary.builder', trip_id=trip_id))
 
     cur = mysql.connection.cursor()

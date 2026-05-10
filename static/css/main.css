@@ -1208,8 +1208,47 @@ a:hover {
     text-transform: uppercase;
 }
 
+.currency-control small {
+    display: block;
+    margin-top: 0.3rem;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
 .money {
     font-variant-numeric: tabular-nums;
+}
+
+.emergency-list {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.emergency-list div,
+.emergency-mini {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.72rem 0.85rem;
+    border-radius: 14px;
+    background: rgba(244,247,251,0.78);
+}
+
+.emergency-list span,
+.emergency-mini span {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.emergency-list strong,
+.emergency-mini strong {
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 850;
+    text-align: right;
 }
 
 .table {

@@ -5,6 +5,14 @@ from utils.helpers import is_valid_date_range, is_positive_number, generate_shar
 
 trips_bp = Blueprint('trips', __name__)
 
+
+def _profile_is_complete(user_id):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT name, email, location, bio FROM users WHERE id = %s", (user_id,))
+    user = cur.fetchone()
+    cur.close()
+    return bool(user and user.get('name') and user.get('email') and user.get('location') and user.get('bio'))
+
 @trips_bp.route('/trips')
 @login_required
 def list_trips():
@@ -34,6 +42,10 @@ def list_trips():
 @trips_bp.route('/trips/create', methods=['GET', 'POST'])
 @login_required
 def create_trip():
+    if not _profile_is_complete(session['user_id']):
+        flash('Please complete your profile information before creating a trip.', 'warning')
+        return redirect(url_for('profile.edit'))
+
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         destination = request.form.get('destination', '').strip()

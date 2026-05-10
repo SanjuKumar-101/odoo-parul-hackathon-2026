@@ -62,6 +62,14 @@
                     <span>Cost Index</span>
                     <strong>{{ city.cost_index }}</strong>
                 </div>
+                <div class="discover-meta">
+                    <span>Currency</span>
+                    <strong>{{ city.currency_code or 'INR' }}</strong>
+                </div>
+                <div class="emergency-mini">
+                    <span><i class="bi bi-shield-plus me-1"></i>Emergency</span>
+                    <strong>{{ city.emergency_police or 'Local line' }}</strong>
+                </div>
                 <a href="{{ url_for('search.search_activities', city_id=city.id) }}"
                    class="btn btn-primary w-100">
                     <i class="bi bi-binoculars me-1"></i>View Activities

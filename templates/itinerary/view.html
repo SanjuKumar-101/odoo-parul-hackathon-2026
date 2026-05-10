@@ -23,7 +23,14 @@
                 <option value="GBP">GBP</option>
                 <option value="JPY">JPY</option>
                 <option value="AUD">AUD</option>
+                <option value="AED">AED</option>
+                <option value="THB">THB</option>
+                <option value="IDR">IDR</option>
+                <option value="ZAR">ZAR</option>
             </select>
+            {% if city_info and city_info.currency_code %}
+            <small>Destination: {{ city_info.currency_code }}</small>
+            {% endif %}
         </div>
         <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}" class="btn btn-primary">
             <i class="bi bi-pencil me-1"></i>Edit Itinerary
@@ -120,6 +127,19 @@
             </div>
 
             <div class="col-lg-4">
+                {% if city_info %}
+                <section class="card trip-summary-card mb-4">
+                    <div class="card-header"><i class="bi bi-shield-plus me-2"></i>Emergency Contacts</div>
+                    <div class="card-body">
+                        <div class="emergency-list">
+                            <div><span>Police</span><strong>{{ city_info.emergency_police or 'Local emergency line' }}</strong></div>
+                            <div><span>Ambulance</span><strong>{{ city_info.emergency_ambulance or 'Local emergency line' }}</strong></div>
+                            <div><span>Fire</span><strong>{{ city_info.emergency_fire or 'Local emergency line' }}</strong></div>
+                            <div><span>Tourist help</span><strong>{{ city_info.emergency_tourist_helpline or 'Ask local authorities' }}</strong></div>
+                        </div>
+                    </div>
+                </section>
+                {% endif %}
                 {% if category_totals %}
                 <section class="card trip-summary-card mb-4">
                     <div class="card-header"><i class="bi bi-pie-chart me-2"></i>Cost by Category</div>

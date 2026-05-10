@@ -24,13 +24,15 @@ Traveloop does not depend on third-party travel APIs. City and activity data are
 - Day-wise itinerary builder
 - Activity cost planning
 - Budget dashboard with expense tracking and category charts
-- Display currency selector for budget readability
+- INR-based currency conversion display for budget readability
 - Packing checklist with packed/unpacked state
 - Trip notes and journal entries
 - Community page for public itineraries
 - Admin analytics dashboard and city/user/trip management
 - Responsive UI with a polished travel-product visual system
 - User-friendly flash messages and custom error pages
+- Destination-locked itinerary days to prevent unrelated city entries
+- Emergency contact numbers for supported destination cities
 
 ## Project Structure
 
@@ -121,6 +123,12 @@ Run the SQL file in MySQL:
 
 ```bash
 mysql -u root -p < database/schema.sql
+```
+
+For an existing Traveloop database, run the latest migration instead of recreating the database:
+
+```bash
+mysql -u root -p traveloop < database/migrations/2026_05_10_final_features.sql
 ```
 
 This creates the `traveloop` database and inserts seed cities and activities.

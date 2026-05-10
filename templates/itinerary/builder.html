@@ -34,8 +34,8 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold" for="city">City</label>
                         <input type="text" id="city" name="city" class="form-control"
-                               placeholder="e.g. Paris" data-city-autocomplete>
-                        <div class="form-text">Start typing to choose from available cities.</div>
+                               value="{{ trip.destination }}" readonly>
+                        <div class="form-text">Locked to this trip destination to keep the itinerary consistent.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold" for="notes">Notes</label>
@@ -45,6 +45,19 @@
                 </form>
             </div>
         </aside>
+        {% if city_info %}
+        <aside class="card trip-summary-card mt-3">
+            <div class="card-header"><i class="bi bi-shield-plus me-2"></i>Emergency Contacts</div>
+            <div class="card-body">
+                <div class="emergency-list">
+                    <div><span>Police</span><strong>{{ city_info.emergency_police or 'Local emergency line' }}</strong></div>
+                    <div><span>Ambulance</span><strong>{{ city_info.emergency_ambulance or 'Local emergency line' }}</strong></div>
+                    <div><span>Fire</span><strong>{{ city_info.emergency_fire or 'Local emergency line' }}</strong></div>
+                    <div><span>Tourist help</span><strong>{{ city_info.emergency_tourist_helpline or 'Ask local authorities' }}</strong></div>
+                </div>
+            </div>
+        </aside>
+        {% endif %}
     </div>
 
     <div class="col-lg-8">

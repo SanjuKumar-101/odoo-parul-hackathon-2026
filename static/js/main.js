@@ -31,16 +31,29 @@ document.addEventListener('DOMContentLoaded', function () {
         syncEndDateMin();
     });
 
-    // Presentation-only currency formatting for pages that mark values with data-money.
+    // Currency formatting for values stored in INR. Rates are local fallback rates
+    // to avoid third-party API dependency during judging/demo.
     const currencySelector = document.querySelector('[data-currency-selector]');
     const moneyValues = document.querySelectorAll('[data-money]');
     if (currencySelector && moneyValues.length) {
-        const browserCurrency = navigator.language === 'en-IN' ? 'INR' : 'USD';
-        const savedCurrency = localStorage.getItem('traveloopCurrency') || browserCurrency;
+        const currencyRatesFromInr = {
+            INR: 1,
+            USD: 0.012,
+            EUR: 0.011,
+            GBP: 0.0095,
+            JPY: 1.8,
+            AUD: 0.018,
+            AED: 0.044,
+            THB: 0.43,
+            IDR: 190,
+            ZAR: 0.22
+        };
+        const savedCurrency = localStorage.getItem('traveloopCurrency') || 'INR';
         currencySelector.value = savedCurrency;
 
         const applyCurrency = currency => {
             localStorage.setItem('traveloopCurrency', currency);
+            const rate = currencyRatesFromInr[currency] || 1;
             const formatter = new Intl.NumberFormat(undefined, {
                 style: 'currency',
                 currency,
@@ -49,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             moneyValues.forEach(el => {
                 const amount = Number(el.dataset.money);
-                if (!Number.isNaN(amount)) el.textContent = formatter.format(amount);
+                if (!Number.isNaN(amount)) el.textContent = formatter.format(amount * rate);
             });
         };
 

@@ -48,6 +48,29 @@
                         <input type="number" name="popularity" class="form-control"
                                placeholder="0–100" min="0" max="100" value="50">
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Currency Code</label>
+                        <input type="text" name="currency_code" class="form-control"
+                               placeholder="e.g. INR, GBP" maxlength="3" value="INR">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">Police</label>
+                            <input type="text" name="emergency_police" class="form-control" placeholder="100">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">Ambulance</label>
+                            <input type="text" name="emergency_ambulance" class="form-control" placeholder="108">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">Fire</label>
+                            <input type="text" name="emergency_fire" class="form-control" placeholder="101">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">Tourist Help</label>
+                            <input type="text" name="emergency_tourist_helpline" class="form-control" placeholder="1363">
+                        </div>
+                    </div>
                     <button type="submit" class="btn btn-primary w-100">Add City</button>
                 </form>
             </div>
@@ -66,6 +89,8 @@
                                 <th>Country</th>
                                 <th>Region</th>
                                 <th>Cost Index</th>
+                                <th>Currency</th>
+                                <th>Emergency</th>
                                 <th>Popularity</th>
                                 <th>Image</th>
                                 <th></th>
@@ -78,6 +103,8 @@
                                 <td class="text-muted small">{{ city.country }}</td>
                                 <td class="text-muted small">{{ city.region }}</td>
                                 <td>{{ city.cost_index }}</td>
+                                <td>{{ city.currency_code or 'INR' }}</td>
+                                <td class="text-muted small">{{ city.emergency_police or '-' }}</td>
                                 <td>
                                     <div class="progress" style="height:6px;width:80px;">
                                         <div class="progress-bar bg-primary"
