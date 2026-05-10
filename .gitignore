@@ -3,3 +3,26 @@ __pycache__/
 *.pyc
 .env
 instance/
+
+# Python cache
+*.pyo
+*.pyd
+
+# VS Code
+.vscode/
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# Environment folders
+env/
+ENV/
+.venv/
+
+# OS files
+.DS_Store
+Thumbs.db
