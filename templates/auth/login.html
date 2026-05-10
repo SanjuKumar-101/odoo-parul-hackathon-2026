@@ -3,15 +3,22 @@
 {% block body_class %}auth-page{% endblock %}
 {% block main_class %}auth-main{% endblock %}
 {% block content %}
-<div class="auth-wrapper">
+<div class="auth-wrapper auth-wrapper--slideshow">
+    <div class="auth-slideshow" aria-hidden="true">
+        <span style="background-image: url('{{ url_for('static', filename='images/cities/bali.jpg') }}');"></span>
+        <span style="background-image: url('{{ url_for('static', filename='images/cities/paris.jpg') }}');"></span>
+        <span style="background-image: url('{{ url_for('static', filename='images/cities/tokyo.avif') }}');"></span>
+        <span style="background-image: url('{{ url_for('static', filename='images/cities/dubai.avif') }}');"></span>
+        <span style="background-image: url('{{ url_for('static', filename='images/cities/london.jpg') }}');"></span>
+    </div>
     <section class="auth-visual" aria-label="Traveloop welcome">
         <div class="auth-visual-content">
             <div class="auth-eyebrow">
                 <i class="bi bi-compass"></i>
                 Smart travel planning
             </div>
-            <h1>Plan trips with less chaos.</h1>
-            <p>Build itineraries, track budgets, and keep every travel detail connected from the first idea to the final day.</p>
+            <h1>Travel planning, beautifully organized.</h1>
+            <p>Plan routes, budgets, notes, and activities in one calm workspace built for your next journey.</p>
         </div>
     </section>
 
@@ -22,7 +29,7 @@
                     <i class="bi bi-airplane-fill"></i>
                 </span>
                 <h3 class="auth-title">Welcome back</h3>
-                <p class="auth-subtitle">Log in to continue planning your next route.</p>
+                <p class="auth-subtitle">Sign in to continue your itinerary.</p>
             </div>
             <form method="POST" novalidate>
                 <div class="mb-3">
