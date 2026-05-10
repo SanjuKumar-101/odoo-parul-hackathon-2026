@@ -23,9 +23,16 @@ def view(trip_id):
 
     cur.execute("SELECT * FROM itinerary_days WHERE trip_id = %s ORDER BY day_number", (trip_id,))
     days = cur.fetchall()
-    cur.close()
 
-    return render_template('notes/view.html', trip=trip, notes=notes, days=days)
+    # Note counts
+    total_notes = len(notes)
+    general_notes = sum(1 for n in notes if not n['day_id'])
+    day_notes = total_notes - general_notes
+
+    cur.close()
+    return render_template('notes/view.html', trip=trip, notes=notes, days=days,
+                           total_notes=total_notes, general_notes=general_notes,
+                           day_notes=day_notes)
 
 @notes_bp.route('/trips/<int:trip_id>/notes/add', methods=['POST'])
 @login_required
@@ -44,6 +51,25 @@ def add_note(trip_id):
     mysql.connection.commit()
     cur.close()
     flash('Note saved.', 'success')
+    return redirect(url_for('notes.view', trip_id=trip_id))
+
+@notes_bp.route('/trips/<int:trip_id>/notes/<int:note_id>/edit', methods=['POST'])
+@login_required
+def edit_note(trip_id, note_id):
+    title = request.form.get('title', '').strip()
+    content = request.form.get('content', '').strip()
+
+    if not content:
+        flash('Note content is required.', 'danger')
+        return redirect(url_for('notes.view', trip_id=trip_id))
+
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        UPDATE trip_notes SET title=%s, content=%s WHERE id=%s AND trip_id=%s
+    """, (title, content, note_id, trip_id))
+    mysql.connection.commit()
+    cur.close()
+    flash('Note updated.', 'success')
     return redirect(url_for('notes.view', trip_id=trip_id))
 
 @notes_bp.route('/trips/<int:trip_id>/notes/<int:note_id>/delete', methods=['POST'])

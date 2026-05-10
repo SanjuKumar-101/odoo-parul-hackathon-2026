@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS activities (
     cost DECIMAL(8,2) DEFAULT 0.00,
     duration_hours DECIMAL(4,1) DEFAULT 1.0,
     description TEXT,
+    UNIQUE KEY unique_activity (city_id, name),
     FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE CASCADE
 );
 

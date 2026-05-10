@@ -27,11 +27,33 @@ def search_cities():
     regions = [r['region'] for r in cur.fetchall()]
     cur.close()
 
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify(cities)
-
     return render_template('search/cities.html', cities=cities, regions=regions,
                            query=query, selected_region=region)
+
+@search_bp.route('/api/cities')
+def api_cities():
+    """JSON endpoint for live city search dropdown"""
+    q = request.args.get('q', '').strip()
+    if len(q) < 1:
+        return jsonify([])
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT id, name, country, region FROM cities
+        WHERE name LIKE %s ORDER BY popularity DESC LIMIT 8
+    """, (f'%{q}%',))
+    cities = cur.fetchall()
+    cur.close()
+    return jsonify(cities)
+
+@search_bp.route('/api/cities/validate')
+def validate_city():
+    """Check if a city name exists in our database"""
+    name = request.args.get('name', '').strip()
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT id FROM cities WHERE LOWER(name) = LOWER(%s)", (name,))
+    exists = cur.fetchone() is not None
+    cur.close()
+    return jsonify({'exists': exists})
 
 @search_bp.route('/search/activities')
 def search_activities():

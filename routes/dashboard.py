@@ -38,8 +38,15 @@ def index():
     cur.execute("SELECT COUNT(*) as cnt FROM trips WHERE user_id = %s AND status='completed'", (user_id,))
     completed = cur.fetchone()['cnt']
 
-    # Popular cities
-    cur.execute("SELECT * FROM cities ORDER BY popularity DESC LIMIT 6")
+    # Popular cities — ordered by actual trip bookings
+    cur.execute("""
+        SELECT c.*, COUNT(t.id) as booking_count
+        FROM cities c
+        LEFT JOIN trips t ON LOWER(t.destination) = LOWER(c.name)
+        GROUP BY c.id
+        ORDER BY booking_count DESC, c.popularity DESC
+        LIMIT 6
+    """)
     popular_cities = cur.fetchall()
 
     cur.close()
