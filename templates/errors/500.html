@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Server Error - Traveloop{% endblock %}
+{% block content %}
+<section class="empty-state page-empty">
+    <span class="empty-icon"><i class="bi bi-tools"></i></span>
+    <h3>Something went wrong</h3>
+    <p>Traveloop could not complete that request. Go back to the dashboard and try again in a moment.</p>
+    <a href="{{ url_for('dashboard.index') if session.user_id else url_for('auth.login') }}" class="btn btn-primary">
+        Return to Traveloop
+    </a>
+</section>
+{% endblock %}

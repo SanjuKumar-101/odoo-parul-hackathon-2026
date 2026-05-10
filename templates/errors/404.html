@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Page Not Found - Traveloop{% endblock %}
+{% block content %}
+<section class="empty-state page-empty">
+    <span class="empty-icon"><i class="bi bi-compass"></i></span>
+    <h3>Page not found</h3>
+    <p>The route you opened does not exist or may have moved. Head back to your dashboard and continue planning.</p>
+    <a href="{{ url_for('dashboard.index') if session.user_id else url_for('auth.login') }}" class="btn btn-primary">
+        Go back safely
+    </a>
+</section>
+{% endblock %}
