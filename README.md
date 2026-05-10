@@ -1,204 +1,153 @@
 # Traveloop
 
-Traveloop is a full-stack travel planning and itinerary management web application built for the Odoo X Parul University hackathon qualification round.
+Traveloop is a full-stack travel planning and itinerary management web application built for the **Odoo X Parul University Hackathon 2026** qualification round.
 
-It helps users create multi-day trips, manage itinerary activities, track expenses, prepare packing checklists, write trip notes, discover destinations, and share public itineraries.
+It helps users plan and manage trips from one centralized platform by allowing them to create trips, build day-wise itineraries, track expenses, prepare packing checklists, write trip notes, discover destinations, view emergency contacts, and share public itineraries.
+
+---
+
+## Live Demo
+
+**Live App:**  
+https://odoo-parul-hackathon-2026-tefi.vercel.app/login
+
+**GitHub Repository:**  
+https://github.com/SanjuKumar-101/odoo-parul-hackathon-2026
+
+---
+
+## Problem Statement
+
+Travel planning is often scattered across multiple tools such as notes apps, spreadsheets, messaging apps, maps, and travel websites. Users may plan destinations in one place, budgets somewhere else, activities in another app, and packing lists separately.
+
+Traveloop solves this problem by providing a structured, database-driven travel planning platform where users can manage the complete travel workflow from trip creation to itinerary planning, expense tracking, checklist management, notes, and public sharing.
+
+---
+
+## Key Objectives
+
+- Provide a clean and responsive travel planning interface.
+- Store and manage real user data dynamically using MySQL.
+- Avoid dependency on third-party travel APIs.
+- Support complete trip management from planning to sharing.
+- Demonstrate scalable backend structure using Flask Blueprints.
+- Provide a polished user experience suitable for real-world use.
+
+---
 
 ## Tech Stack
 
-- Backend: Flask
-- Database: MySQL
-- Frontend: HTML, CSS, Bootstrap 5, JavaScript
-- Charts: Chart.js
-- Database driver: Flask-MySQLdb with PyMySQL compatibility
+| Layer | Technology |
+|---|---|
+| Backend | Flask |
+| Database | MySQL |
+| Cloud Database | Aiven MySQL |
+| Deployment | Vercel |
+| Frontend | HTML, CSS, Bootstrap 5, JavaScript |
+| Charts | Chart.js |
+| Database Driver | PyMySQL |
+| Version Control | Git and GitHub |
 
-Traveloop does not depend on third-party travel APIs. City and activity data are stored in MySQL seed tables so the application remains dynamic and database-backed.
+Traveloop does not rely on third-party travel APIs. City, activity, itinerary, budget, checklist, emergency contact, and trip data are managed through MySQL, making the application dynamic and database-backed.
+
+---
 
 ## Core Features
 
-- User registration, login, logout, and session-based access control
-- Trip creation, editing, deletion, status tracking, and public sharing
-- City discovery with MySQL-backed search and filters
-- Activity discovery by city and category
-- City autocomplete backed by internal Flask JSON endpoints
+### User Management
+
+- User registration
+- User login and logout
+- Session-based access control
+- Profile management
+- Admin access control
+
+### Trip Management
+
+- Create trips
+- View trips
+- Edit trips
+- Delete trips
+- Track trip status
+- Share trips publicly
+- View public/shared itineraries
+
+### Itinerary Planning
+
 - Day-wise itinerary builder
+- Destination-locked itinerary planning
+- Activity selection by destination
 - Activity cost planning
-- Budget dashboard with expense tracking and category charts
-- INR-based currency conversion display for budget readability
-- Packing checklist with packed/unpacked state
-- Trip notes and journal entries
-- Community page for public itineraries
-- Admin analytics dashboard and city/user/trip management
-- Responsive UI with a polished travel-product visual system
-- User-friendly flash messages and custom error pages
-- Destination-locked itinerary days to prevent unrelated city entries
+- Structured itinerary view
+
+### City and Activity Discovery
+
+- MySQL-backed city search
+- Activity search by city and category
+- City autocomplete using internal Flask JSON endpoints
+- Destination images for improved user experience
+
+### Budget and Expense Tracking
+
+- Add and manage trip expenses
+- Category-wise expense tracking
+- Budget dashboard
+- Chart.js-based visual summaries
+- INR-based currency display for better readability
+
+### Packing Checklist
+
+- Add packing items
+- Mark items as packed or unpacked
+- Delete checklist items
+- Organize travel preparation
+
+### Trip Notes
+
+- Add travel notes
+- Store trip-related reminders
+- Maintain journal-style trip information
+
+### Community and Sharing
+
+- Public trip feed
+- Shared itinerary view
+- Community trip discovery
+- Public read-only trip plans
+
+### Admin Dashboard
+
+- Admin-only access
+- User management
+- Trip management
+- City management
+- Analytics dashboard
+- Chart-based data visualization
+
+### Safety Feature
+
 - Emergency contact numbers for supported destination cities
+- Travel safety information available through destination data
+
+---
 
 ## Project Structure
 
 ```text
 traveloop/
-  app.py                  # Flask application factory and blueprint registration
-  config.py               # Environment-based configuration
-  wsgi.py                 # Deployment entry point
-  requirements.txt        # Python dependencies
-  database/schema.sql     # MySQL schema and seed data
-  routes/                 # Feature-based Flask blueprints
-  templates/              # Jinja templates
-  static/css/main.css     # Global UI system and responsive styling
-  static/js/              # App JavaScript and internal API-powered autocomplete
-  static/images/          # Destination and profile images
-```
-
-## Database Design
-
-The app uses normalized MySQL tables with foreign keys:
-
-- `users`
-- `cities`
-- `activities`
-- `trips`
-- `itinerary_days`
-- `itinerary_items`
-- `expenses`
-- `packing_items`
-- `trip_notes`
-
-The schema also includes a `budgets` table for category budget expansion, while the current UI primarily tracks actual spending through `expenses`.
-
-## Internal Backend APIs
-
-Traveloop includes lightweight internal JSON endpoints:
-
-- `GET /api/cities?q=<query>` for city autocomplete
-- `GET /api/cities/validate?name=<city>` for typed city validation
-
-These endpoints read from MySQL and do not call third-party services.
-
-## Setup
-
-### 1. Create a virtual environment
-
-```bash
-python -m venv .venv
-```
-
-Windows:
-
-```bash
-.venv\Scripts\activate
-```
-
-macOS/Linux:
-
-```bash
-source .venv/bin/activate
-```
-
-### 2. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Configure environment variables
-
-Copy `.env.example` to `.env` and update the values:
-
-```bash
-SECRET_KEY=replace-with-a-long-random-secret
-FLASK_DEBUG=1
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_USER=root
-MYSQL_PASSWORD=your_mysql_password
-MYSQL_DB=traveloop
-```
-
-Do not commit `.env`. It is already ignored by `.gitignore`.
-
-### 4. Create and seed the MySQL database
-
-Run the SQL file in MySQL:
-
-```bash
-mysql -u root -p < database/schema.sql
-```
-
-For an existing Traveloop database, run the latest migration instead of recreating the database:
-
-```bash
-mysql -u root -p traveloop < database/migrations/2026_05_10_final_features.sql
-```
-
-This creates the `traveloop` database and inserts seed cities and activities.
-
-### 5. Run the app locally
-
-```bash
-python app.py
-```
-
-Or:
-
-```bash
-python -m flask --app app:create_app run
-```
-
-Open:
-
-```text
-http://127.0.0.1:5000
-```
-
-## Deployment Notes
-
-Use environment variables in production. At minimum, set:
-
-- `SECRET_KEY`
-- `MYSQL_HOST`
-- `MYSQL_PORT`
-- `MYSQL_USER`
-- `MYSQL_PASSWORD`
-- `MYSQL_DB`
-- `FLASK_DEBUG=0`
-
-The WSGI entry point is:
-
-```text
-wsgi:app
-```
-
-For a Linux host, a typical production command is:
-
-```bash
-gunicorn wsgi:app
-```
-
-If your host does not provide Gunicorn automatically, add it to the deployment environment or use the platform's recommended WSGI server.
-
-## Judge-Focused Highlights
-
-- Modular Flask Blueprint architecture by feature area
-- MySQL-backed dynamic data instead of static JSON
-- Parameterized SQL queries for safer database access
-- Normalized database schema with foreign keys and cascading deletes
-- Internal backend API endpoints for autocomplete
-- Clear validation and user-facing flash messages
-- Custom 404, 413, and 500 error pages
-- Responsive, polished UI with consistent navigation and visual hierarchy
-- Public itinerary sharing and community trip copying
-- Admin analytics with Chart.js visualizations
-
-## Version Control Checklist
-
-Before final submission:
-
-```bash
-git status
-git add .
-git commit -m "Prepared Traveloop for final deployment readiness"
-git push
-```
-
-Make sure `.env` is not committed.
+├── app.py                  # Flask application factory and blueprint registration
+├── config.py               # Environment-based configuration
+├── wsgi.py                 # WSGI deployment entry point
+├── vercel_app.py           # Vercel serverless entry point
+├── vercel.json             # Vercel deployment configuration
+├── requirements.txt        # Python dependencies
+├── database/
+│   ├── schema.sql          # MySQL schema and seed data
+│   └── migrations/         # Database migration files
+├── routes/                 # Feature-based Flask blueprints
+├── templates/              # Jinja2 HTML templates
+├── static/
+│   ├── css/main.css        # Global UI system and responsive styling
+│   ├── js/                 # JavaScript and autocomplete logic
+│   └── images/             # Destination and profile images
+└── utils/                  # Helper functions and decorators
