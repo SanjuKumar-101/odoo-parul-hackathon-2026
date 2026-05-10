@@ -8,25 +8,12 @@ def search_cities():
     query = request.args.get('q', '').strip()
     region = request.args.get('region', '').strip()
     cur = mysql.connection.cursor()
-
-    if query and region:
-        cur.execute("""
-            SELECT * FROM cities WHERE name LIKE %s AND region = %s
-            ORDER BY popularity DESC
-        """, (f'%{query}%', region))
-    elif query:
-        cur.execute("SELECT * FROM cities WHERE name LIKE %s ORDER BY popularity DESC",
-                    (f'%{query}%',))
-    elif region:
-        cur.execute("SELECT * FROM cities WHERE region = %s ORDER BY popularity DESC", (region,))
-    else:
-        cur.execute("SELECT * FROM cities ORDER BY popularity DESC LIMIT 20")
-
+    # Always return all cities — filtering is done client-side
+    cur.execute("SELECT * FROM cities ORDER BY popularity DESC")
     cities = cur.fetchall()
     cur.execute("SELECT DISTINCT region FROM cities WHERE region IS NOT NULL ORDER BY region ASC")
     regions = [r['region'] for r in cur.fetchall()]
     cur.close()
-
     return render_template('search/cities.html', cities=cities, regions=regions,
                            query=query, selected_region=region)
 

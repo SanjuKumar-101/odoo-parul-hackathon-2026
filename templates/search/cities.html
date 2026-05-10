@@ -5,18 +5,19 @@
     <h4><i class="bi bi-globe me-2"></i>Explore Cities</h4>
 </div>
 
+<!-- Search Bar — fully client side, no page refresh -->
 <div class="card mb-4">
     <div class="card-body">
-        <form method="GET" id="citySearchForm" class="row g-2 align-items-end">
+        <div class="row g-2 align-items-end">
             <div class="col-md-5">
                 <label class="form-label fw-semibold small">Search City</label>
-                <input type="text" name="q" id="citySearchInput" class="form-control"
-                       placeholder="e.g. Paris, Tokyo..." value="{{ query }}"
-                       autocomplete="off">
+                <input type="text" id="citySearchInput" class="form-control"
+                       placeholder="e.g. Paris, Tokyo..." autocomplete="off"
+                       value="{{ query }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label fw-semibold small">Filter by Region</label>
-                <select name="region" class="form-select" onchange="this.form.submit()">
+                <select id="regionFilter" class="form-select">
                     <option value="">All Regions</option>
                     {% for r in regions | sort %}
                     <option value="{{ r }}" {% if r == selected_region %}selected{% endif %}>{{ r }}</option>
@@ -24,26 +25,24 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Search</button>
+                <button onclick="clearFilters()" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-x-lg me-1"></i>Clear
+                </button>
             </div>
-            {% if query or selected_region %}
-            <div class="col-md-1">
-                <a href="{{ url_for('search.search_cities') }}" class="btn btn-outline-secondary w-100" title="Clear">
-                    <i class="bi bi-x-lg"></i>
-                </a>
-            </div>
-            {% endif %}
-        </form>
+        </div>
     </div>
 </div>
 
-<div class="row g-3">
+<!-- Results Grid — updated by JS -->
+<div id="cityGrid" class="row g-3">
     {% for city in cities %}
-    <div class="col-md-4 col-lg-3">
+    <div class="col-md-4 col-lg-3 city-card-col"
+         data-name="{{ city.name | lower }}"
+         data-region="{{ city.region | lower }}">
         <div class="card trip-card h-100 overflow-hidden">
             {% if city.image_url %}
             <img src="{{ url_for('static', filename=city.image_url) }}"
-                 style="width:100%;height:160px;object-fit:cover;">
+                 style="width:100%;height:160px;object-fit:cover;" loading="lazy">
             {% else %}
             <div style="width:100%;height:160px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:2rem;">🌍</div>
             {% endif %}
@@ -59,35 +58,69 @@
             </div>
         </div>
     </div>
-    {% else %}
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="bi bi-globe text-muted" style="font-size:4rem;"></i>
-                <h5 class="mt-3 text-muted">No cities found</h5>
-                <p class="text-muted small">Try a different search term or region.</p>
-                <a href="{{ url_for('search.search_cities') }}" class="btn btn-outline-primary mt-2">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Search
-                </a>
-            </div>
-        </div>
-    </div>
     {% endfor %}
 </div>
+
+<!-- Empty state (hidden by default, shown by JS) -->
+<div id="emptyState" class="card" style="display:none;">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-globe text-muted" style="font-size:4rem;"></i>
+        <h5 class="mt-3 text-muted" id="emptyMsg">No cities found</h5>
+        <p class="text-muted small">Try a different search term or region.</p>
+        <button onclick="clearFilters()" class="btn btn-outline-primary mt-2">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Search
+        </button>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Debounced search — submits 500ms after user stops typing, no refresh on every keystroke
+const cards = document.querySelectorAll('.city-card-col');
+const emptyState = document.getElementById('emptyState');
 const searchInput = document.getElementById('citySearchInput');
-if (searchInput) {
-    let timer;
-    searchInput.addEventListener('input', function () {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            document.getElementById('citySearchForm').submit();
-        }, 500);
+const regionFilter = document.getElementById('regionFilter');
+
+function filterCities() {
+    const q = searchInput.value.trim().toLowerCase();
+    const region = regionFilter.value.trim().toLowerCase();
+    let visible = 0;
+
+    cards.forEach(card => {
+        const name = card.dataset.name;
+        const cardRegion = card.dataset.region;
+        const matchQ = q === '' || name.includes(q);
+        const matchRegion = region === '' || cardRegion === region;
+
+        if (matchQ && matchRegion) {
+            card.style.display = '';
+            visible++;
+        } else {
+            card.style.display = 'none';
+        }
     });
+
+    if (visible === 0) {
+        emptyState.style.display = '';
+        document.getElementById('emptyMsg').textContent =
+            q ? `No cities found for "${searchInput.value}"` : 'No cities in this region';
+    } else {
+        emptyState.style.display = 'none';
+    }
 }
+
+function clearFilters() {
+    searchInput.value = '';
+    regionFilter.value = '';
+    filterCities();
+}
+
+// Instant filter — no debounce needed since it's all client-side
+searchInput.addEventListener('input', filterCities);
+regionFilter.addEventListener('change', filterCities);
+
+// Run on load in case URL had query params
+filterCities();
 </script>
 {% endblock %}
