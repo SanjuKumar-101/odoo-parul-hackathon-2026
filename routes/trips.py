@@ -80,7 +80,9 @@ def view_trip(trip_id):
         day['items'] = cur.fetchall()
 
     cur.execute("SELECT SUM(amount) as total FROM expenses WHERE trip_id = %s", (trip_id,))
-    spent = cur.fetchone()['total'] or 0
+    spent = float(cur.fetchone()['total'] or 0)
+    trip = dict(trip)
+    trip['total_budget'] = float(trip['total_budget'] or 0)
 
     cur.close()
     return render_template('trips/view.html', trip=trip, days=days, spent=spent)

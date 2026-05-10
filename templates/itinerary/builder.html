@@ -9,6 +9,9 @@
     <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Back to Trip
     </a>
+    <a href="{{ url_for('itinerary.view', trip_id=trip.id) }}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-eye me-1"></i>View Itinerary
+    </a>
 </div>
 
 <div class="row g-4">

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from app import mysql
 from utils.decorators import login_required
-from datetime import datetime, timedelta
+from utils.helpers import is_positive_number
 
 itinerary_bp = Blueprint('itinerary', __name__)
 
@@ -12,6 +12,20 @@ def _get_trip_or_404(trip_id):
     cur.close()
     return trip
 
+def _get_days_with_items(trip_id):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM itinerary_days WHERE trip_id = %s ORDER BY day_number", (trip_id,))
+    days = [dict(row) for row in cur.fetchall()]
+    total_cost = 0.0
+    for day in days:
+        cur.execute("SELECT * FROM itinerary_items WHERE day_id = %s ORDER BY start_time", (day['id'],))
+        items = cur.fetchall()
+        day['items'] = items
+        day['day_total'] = sum(float(i['cost'] or 0) for i in items)
+        total_cost += day['day_total']
+    cur.close()
+    return days, total_cost
+
 @itinerary_bp.route('/trips/<int:trip_id>/itinerary')
 @login_required
 def builder(trip_id):
@@ -19,16 +33,82 @@ def builder(trip_id):
     if not trip:
         flash('Trip not found.', 'danger')
         return redirect(url_for('trips.list_trips'))
+    days, total_cost = _get_days_with_items(trip_id)
+    return render_template('itinerary/builder.html', trip=trip, days=days, total_cost=total_cost)
 
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM itinerary_days WHERE trip_id = %s ORDER BY day_number", (trip_id,))
-    days = [dict(row) for row in cur.fetchall()]
+@itinerary_bp.route('/trips/<int:trip_id>/itinerary/view')
+@login_required
+def view(trip_id):
+    trip = _get_trip_or_404(trip_id)
+    if not trip:
+        flash('Trip not found.', 'danger')
+        return redirect(url_for('trips.list_trips'))
+
+    days, total_cost = _get_days_with_items(trip_id)
+    trip = dict(trip)
+    trip['total_budget'] = float(trip['total_budget'] or 0)
+
+    # Itinerary category breakdown
+    category_totals = {}
     for day in days:
-        cur.execute("SELECT * FROM itinerary_items WHERE day_id = %s ORDER BY start_time", (day['id'],))
-        day['items'] = cur.fetchall()
+        for item in day['items']:
+            cat = item['category'] or 'general'
+            category_totals[cat] = category_totals.get(cat, 0) + float(item['cost'] or 0)
+
+    # Expense data
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM expenses WHERE trip_id = %s ORDER BY expense_date DESC", (trip_id,))
+    expenses = cur.fetchall()
+
+    cur.execute("SELECT SUM(amount) as total FROM expenses WHERE trip_id = %s", (trip_id,))
+    total_spent = float(cur.fetchone()['total'] or 0)
+
+    cur.execute("""
+        SELECT category, SUM(amount) as total
+        FROM expenses WHERE trip_id = %s GROUP BY category
+    """, (trip_id,))
+    by_category = cur.fetchall()
     cur.close()
 
-    return render_template('itinerary/builder.html', trip=trip, days=days)
+    remaining = trip['total_budget'] - total_spent
+
+    return render_template('itinerary/view.html', trip=trip, days=days,
+                           total_cost=total_cost, category_totals=category_totals,
+                           expenses=expenses, total_spent=total_spent,
+                           by_category=by_category, remaining=remaining)
+
+@itinerary_bp.route('/trips/<int:trip_id>/itinerary/add_expense', methods=['POST'])
+@login_required
+def add_expense(trip_id):
+    title = request.form.get('title', '').strip()
+    amount = request.form.get('amount', '').strip()
+    category = request.form.get('category', 'general').strip()
+    expense_date = request.form.get('expense_date', '') or None
+    notes = request.form.get('notes', '').strip()
+
+    if not title or not amount or not is_positive_number(amount):
+        flash('Valid title and amount are required.', 'danger')
+        return redirect(url_for('itinerary.view', trip_id=trip_id))
+
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        INSERT INTO expenses (trip_id, title, amount, category, expense_date, notes)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (trip_id, title, float(amount), category, expense_date, notes))
+    mysql.connection.commit()
+    cur.close()
+    flash('Expense added.', 'success')
+    return redirect(url_for('itinerary.view', trip_id=trip_id) + '#budget')
+
+@itinerary_bp.route('/trips/<int:trip_id>/itinerary/delete_expense/<int:expense_id>', methods=['POST'])
+@login_required
+def delete_expense(trip_id, expense_id):
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM expenses WHERE id = %s AND trip_id = %s", (expense_id, trip_id))
+    mysql.connection.commit()
+    cur.close()
+    flash('Expense removed.', 'info')
+    return redirect(url_for('itinerary.view', trip_id=trip_id) + '#budget')
 
 @itinerary_bp.route('/trips/<int:trip_id>/itinerary/add_day', methods=['POST'])
 @login_required
