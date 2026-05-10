@@ -7,14 +7,17 @@
 
 <div class="card mb-4">
     <div class="card-body">
-        <form method="GET" class="row g-2">
-            <div class="col-md-6">
-                <input type="text" name="q" class="form-control" placeholder="Search city..." value="{{ query }}">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label fw-semibold small">Search City</label>
+                <input type="text" name="q" class="form-control" placeholder="e.g. Paris, Tokyo..." value="{{ query }}"
+                       oninput="this.form.submit()">
             </div>
             <div class="col-md-4">
-                <select name="region" class="form-select">
+                <label class="form-label fw-semibold small">Filter by Region</label>
+                <select name="region" class="form-select" onchange="this.form.submit()">
                     <option value="">All Regions</option>
-                    {% for r in regions %}
+                    {% for r in regions | sort %}
                     <option value="{{ r }}" {% if r == selected_region %}selected{% endif %}>{{ r }}</option>
                     {% endfor %}
                 </select>
@@ -22,6 +25,13 @@
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">Search</button>
             </div>
+            {% if query or selected_region %}
+            <div class="col-md-1">
+                <a href="{{ url_for('search.search_cities') }}" class="btn btn-outline-secondary w-100" title="Clear">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+            {% endif %}
         </form>
     </div>
 </div>

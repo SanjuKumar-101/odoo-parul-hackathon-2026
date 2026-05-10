@@ -13,10 +13,19 @@ def list_trips():
     cur = mysql.connection.cursor()
 
     if status_filter in ('upcoming', 'ongoing', 'completed'):
-        cur.execute("SELECT * FROM trips WHERE user_id = %s AND status = %s ORDER BY start_date ASC",
-                    (user_id, status_filter))
+        cur.execute("""
+            SELECT t.*, COALESCE(SUM(e.amount),0) as spent
+            FROM trips t LEFT JOIN expenses e ON t.id = e.trip_id
+            WHERE t.user_id = %s AND t.status = %s
+            GROUP BY t.id ORDER BY t.start_date ASC
+        """, (user_id, status_filter))
     else:
-        cur.execute("SELECT * FROM trips WHERE user_id = %s ORDER BY start_date ASC", (user_id,))
+        cur.execute("""
+            SELECT t.*, COALESCE(SUM(e.amount),0) as spent
+            FROM trips t LEFT JOIN expenses e ON t.id = e.trip_id
+            WHERE t.user_id = %s
+            GROUP BY t.id ORDER BY t.start_date ASC
+        """, (user_id,))
 
     trips = cur.fetchall()
     cur.close()

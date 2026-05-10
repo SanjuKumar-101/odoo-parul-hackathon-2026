@@ -1,10 +1,18 @@
+import os
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from app import mysql
 from utils.decorators import login_required
 from utils.helpers import is_valid_email
+from config import Config
 
 profile_bp = Blueprint('profile', __name__)
+
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @profile_bp.route('/profile')
 @login_required
@@ -12,10 +20,22 @@ def view():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM users WHERE id = %s", (session['user_id'],))
     user = cur.fetchone()
+
+    cur.execute("SELECT COUNT(*) as total FROM trips WHERE user_id = %s", (session['user_id'],))
+    total_trips = cur.fetchone()['total']
+
+    cur.execute("SELECT COUNT(*) as cnt FROM trips WHERE user_id = %s AND status='completed'", (session['user_id'],))
+    completed = cur.fetchone()['cnt']
+
+    cur.execute("SELECT COALESCE(SUM(total_budget),0) as total FROM trips WHERE user_id = %s", (session['user_id'],))
+    total_budget = float(cur.fetchone()['total'])
+
     cur.execute("SELECT * FROM trips WHERE user_id = %s ORDER BY created_at DESC", (session['user_id'],))
     trips = cur.fetchall()
     cur.close()
-    return render_template('profile/view.html', user=user, trips=trips)
+    return render_template('profile/view.html', user=user, trips=trips,
+                           total_trips=total_trips, completed=completed,
+                           total_budget=total_budget)
 
 @profile_bp.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
@@ -25,8 +45,13 @@ def edit():
     user = cur.fetchone()
 
     if request.method == 'POST':
-        name = request.form.get('name', '').strip()
-        email = request.form.get('email', '').strip()
+        name     = request.form.get('name', '').strip()
+        email    = request.form.get('email', '').strip()
+        tagline  = request.form.get('tagline', '').strip()
+        bio      = request.form.get('bio', '').strip()
+        location = request.form.get('location', '').strip()
+        new_password = request.form.get('new_password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
 
         if not name or not email:
             flash('Name and email are required.', 'danger')
@@ -41,12 +66,37 @@ def edit():
             flash('Email already in use.', 'danger')
             return render_template('profile/edit.html', user=user)
 
-        cur.execute("UPDATE users SET name = %s, email = %s WHERE id = %s",
-                    (name, email, session['user_id']))
+        # Handle password change
+        if new_password:
+            if len(new_password) < 6:
+                flash('Password must be at least 6 characters.', 'danger')
+                return render_template('profile/edit.html', user=user)
+            if new_password != confirm_password:
+                flash('Passwords do not match.', 'danger')
+                return render_template('profile/edit.html', user=user)
+            hashed = generate_password_hash(new_password)
+            cur.execute("UPDATE users SET password_hash = %s WHERE id = %s",
+                        (hashed, session['user_id']))
+            mysql.connection.commit()
+
+        # Handle photo upload
+        photo_path = user['profile_photo']
+        file = request.files.get('profile_photo')
+        if file and file.filename and allowed_file(file.filename):
+            filename = secure_filename(f"user_{session['user_id']}_{file.filename}")
+            upload_dir = os.path.join(Config.UPLOAD_FOLDER, 'profiles')
+            os.makedirs(upload_dir, exist_ok=True)
+            file.save(os.path.join(upload_dir, filename))
+            photo_path = f"images/profiles/{filename}"
+
+        cur.execute("""
+            UPDATE users SET name=%s, email=%s, tagline=%s, bio=%s,
+            location=%s, profile_photo=%s WHERE id=%s
+        """, (name, email, tagline, bio, location, photo_path, session['user_id']))
         mysql.connection.commit()
         session['user_name'] = name
         cur.close()
-        flash('Profile updated.', 'success')
+        flash('Profile updated successfully.', 'success')
         return redirect(url_for('profile.view'))
 
     cur.close()

@@ -23,7 +23,7 @@ def search_cities():
         cur.execute("SELECT * FROM cities ORDER BY popularity DESC LIMIT 20")
 
     cities = cur.fetchall()
-    cur.execute("SELECT DISTINCT region FROM cities WHERE region IS NOT NULL")
+    cur.execute("SELECT DISTINCT region FROM cities WHERE region IS NOT NULL ORDER BY region ASC")
     regions = [r['region'] for r in cur.fetchall()]
     cur.close()
 

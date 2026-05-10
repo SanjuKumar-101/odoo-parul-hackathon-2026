@@ -1,28 +1,144 @@
 {% extends 'base.html' %}
 {% block title %}Edit Profile – Traveloop{% endblock %}
 {% block content %}
+
 <div class="page-header">
     <h4><i class="bi bi-pencil me-2"></i>Edit Profile</h4>
-    <a href="{{ url_for('profile.view') }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+    <a href="{{ url_for('profile.view') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Cancel
+    </a>
 </div>
+
 <div class="row justify-content-center">
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-header">Update Your Details</div>
-            <div class="card-body">
-                <form method="POST" novalidate>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Full Name *</label>
-                        <input type="text" name="name" class="form-control" value="{{ user.name }}" required>
+    <div class="col-lg-8">
+        <form method="POST" enctype="multipart/form-data" novalidate>
+
+            <!-- Profile Photo + Basic Info -->
+            <div class="card mb-4">
+                <div class="card-header"><i class="bi bi-person me-2"></i>Basic Information</div>
+                <div class="card-body">
+                    <div class="row g-4 align-items-center mb-4">
+                        <!-- Current Photo Preview -->
+                        <div class="col-auto">
+                            {% if user.profile_photo %}
+                            <img src="{{ url_for('static', filename=user.profile_photo) }}"
+                                 id="photoPreview"
+                                 class="rounded-circle border border-3 border-primary"
+                                 style="width:90px;height:90px;object-fit:cover;">
+                            {% else %}
+                            <div id="photoPreview"
+                                 class="rounded-circle d-flex align-items-center justify-content-center border border-3 border-primary"
+                                 style="width:90px;height:90px;font-size:2rem;background:#eff6ff;color:#2563eb;">
+                                {{ user.name[0].upper() }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-semibold">Profile Photo</label>
+                            <input type="file" name="profile_photo" class="form-control"
+                                   accept=".jpg,.jpeg,.png,.webp" id="photoInput">
+                            <small class="text-muted">JPG, PNG or WEBP. Max 5MB.</small>
+                        </div>
                     </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Email *</label>
-                        <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name *</label>
+                            <input type="text" name="name" class="form-control"
+                                   value="{{ user.name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email *</label>
+                            <input type="email" name="email" class="form-control"
+                                   value="{{ user.email }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tagline</label>
+                            <input type="text" name="tagline" class="form-control"
+                                   value="{{ user.tagline or '' }}"
+                                   placeholder="e.g. Adventure seeker & travel lover">
+                            <small class="text-muted">Short line shown under your name.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Location</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                <input type="text" name="location" class="form-control"
+                                       value="{{ user.location or '' }}"
+                                       placeholder="e.g. Mumbai, India">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Bio</label>
+                            <textarea name="bio" class="form-control" rows="3"
+                                      placeholder="Tell others about yourself and your travel style...">{{ user.bio or '' }}</textarea>
+                            <small class="text-muted">A short description about you.</small>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Save Changes</button>
-                </form>
+                </div>
             </div>
-        </div>
+
+            <!-- Change Password -->
+            <div class="card mb-4">
+                <div class="card-header"><i class="bi bi-lock me-2"></i>Change Password
+                    <small class="text-white-50 ms-2">(leave blank to keep current)</small>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">New Password</label>
+                            <div class="input-group">
+                                <input type="password" name="new_password" class="form-control"
+                                       id="newPass" placeholder="Min 6 characters">
+                                <button class="btn btn-outline-secondary" type="button"
+                                        onclick="togglePass('newPass')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Confirm Password</label>
+                            <div class="input-group">
+                                <input type="password" name="confirm_password" class="form-control"
+                                       id="confirmPass" placeholder="Repeat new password">
+                                <button class="btn btn-outline-secondary" type="button"
+                                        onclick="togglePass('confirmPass')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fw-semibold py-2">
+                <i class="bi bi-check-circle me-2"></i>Save Changes
+            </button>
+        </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Live photo preview
+document.getElementById('photoInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        const preview = document.getElementById('photoPreview');
+        preview.outerHTML = `<img src="${ev.target.result}" id="photoPreview"
+            class="rounded-circle border border-3 border-primary"
+            style="width:90px;height:90px;object-fit:cover;">`;
+    };
+    reader.readAsDataURL(file);
+});
+
+// Toggle password visibility
+function togglePass(id) {
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+</script>
 {% endblock %}
