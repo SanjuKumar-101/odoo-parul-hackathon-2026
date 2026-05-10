@@ -23,23 +23,29 @@
         <div class="collapse navbar-collapse" id="navMain">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('dashboard.index') }}"><i class="bi bi-house me-1"></i>Dashboard</a>
+                    <a class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}"
+                       href="{{ url_for('dashboard.index') }}"><i class="bi bi-house me-1"></i>Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('trips.list_trips') }}"><i class="bi bi-map me-1"></i>My Trips</a>
+                    <a class="nav-link {% if request.endpoint and 'trips' in request.endpoint %}active{% endif %}"
+                       href="{{ url_for('trips.list_trips') }}"><i class="bi bi-map me-1"></i>My Trips</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('trips.create_trip') }}"><i class="bi bi-plus-circle me-1"></i>New Trip</a>
+                    <a class="nav-link {% if request.endpoint == 'trips.create_trip' %}active{% endif %}"
+                       href="{{ url_for('trips.create_trip') }}"><i class="bi bi-plus-circle me-1"></i>New Trip</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('search.search_cities') }}"><i class="bi bi-search me-1"></i>Explore</a>
+                    <a class="nav-link {% if request.endpoint and 'search' in request.endpoint %}active{% endif %}"
+                       href="{{ url_for('search.search_cities') }}"><i class="bi bi-search me-1"></i>Explore</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('community.index') }}"><i class="bi bi-people me-1"></i>Community</a>
+                    <a class="nav-link {% if request.endpoint == 'community.index' %}active{% endif %}"
+                       href="{{ url_for('community.index') }}"><i class="bi bi-people me-1"></i>Community</a>
                 </li>
                 {% if session.is_admin %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2 me-1"></i>Admin</a>
+                    <a class="nav-link {% if request.endpoint and 'admin' in request.endpoint %}active{% endif %}"
+                       href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2 me-1"></i>Admin</a>
                 </li>
                 {% endif %}
             </ul>
@@ -60,18 +66,21 @@
 </nav>
 {% endif %}
 
-<div class="container-fluid px-4 py-3">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show mt-2" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+<!-- Flash messages always visible regardless of login state -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index:9999; margin-top:60px;">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endwith %}
 
+<div class="container-fluid px-4 py-3">
     {% block content %}{% endblock %}
 </div>
 

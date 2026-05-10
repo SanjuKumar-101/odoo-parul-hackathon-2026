@@ -121,6 +121,24 @@ body {
 /* Budget progress */
 .budget-bar { height: 10px; border-radius: 5px; }
 
+/* Admin panel */
+.admin-sidebar {
+    background: var(--primary);
+    min-height: 100vh;
+}
+.admin-nav-link {
+    color: rgba(255,255,255,0.8);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    display: block;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.admin-nav-link:hover, .admin-nav-link.active {
+    background: rgba(255,255,255,0.15);
+    color: white;
+}
+
 /* City images */
 .city-img {
     width: 100%;

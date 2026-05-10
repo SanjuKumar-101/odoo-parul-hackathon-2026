@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Manage Trips – Admin{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h4><i class="bi bi-map me-2"></i>Manage Trips</h4>
+        <small class="text-muted">{{ trips|length }} trips</small>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+</div>
+
+<!-- Filter Tabs -->
+<ul class="nav nav-pills mb-4">
+    {% for s in ['all', 'upcoming', 'ongoing', 'completed'] %}
+    <li class="nav-item">
+        <a class="nav-link {% if status_filter == s %}active{% endif %}"
+           href="{{ url_for('admin.trips', status=s) }}">{{ s|capitalize }}</a>
+    </li>
+    {% endfor %}
+</ul>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Trip Name</th>
+                        <th>User</th>
+                        <th>Destination</th>
+                        <th>Dates</th>
+                        <th>Budget</th>
+                        <th>Status</th>
+                        <th>Public</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trip in trips %}
+                    <tr>
+                        <td class="text-muted small">{{ trip.id }}</td>
+                        <td class="fw-semibold">{{ trip.name }}</td>
+                        <td class="text-muted small">{{ trip.user_name }}</td>
+                        <td class="text-muted small">{{ trip.destination }}</td>
+                        <td class="text-muted small">{{ trip.start_date }} → {{ trip.end_date }}</td>
+                        <td>${{ "%.0f"|format(trip.total_budget) }}</td>
+                        <td><span class="badge badge-{{ trip.status }} text-white">{{ trip.status }}</span></td>
+                        <td>
+                            {% if trip.is_public %}
+                            <span class="badge bg-success">Public</span>
+                            {% else %}
+                            <span class="badge bg-light text-dark border">Private</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin.delete_trip', trip_id=trip.id) }}"
+                                  data-confirm="Delete trip '{{ trip.name }}'?">
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

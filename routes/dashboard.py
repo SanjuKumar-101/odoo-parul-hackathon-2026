@@ -10,6 +10,17 @@ def index():
     user_id = session['user_id']
     cur = mysql.connection.cursor()
 
+    # Auto-update trip statuses based on today's date
+    cur.execute("""
+        UPDATE trips SET status = CASE
+            WHEN CURDATE() < start_date THEN 'upcoming'
+            WHEN CURDATE() > end_date THEN 'completed'
+            ELSE 'ongoing'
+        END
+        WHERE user_id = %s
+    """, (user_id,))
+    mysql.connection.commit()
+
     # Recent trips
     cur.execute("""
         SELECT * FROM trips WHERE user_id = %s
