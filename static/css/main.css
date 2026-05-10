@@ -121,6 +121,15 @@ body {
 /* Budget progress */
 .budget-bar { height: 10px; border-radius: 5px; }
 
+/* City images */
+.city-img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    object-position: center;
+    loading: lazy;
+}
+
 /* Responsive table */
 @media (max-width: 768px) {
     .stat-card { margin-bottom: 1rem; }

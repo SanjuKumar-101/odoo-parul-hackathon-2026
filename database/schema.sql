@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS cities (
     region VARCHAR(100),
     cost_index DECIMAL(5,2) DEFAULT 1.00,
     popularity INT DEFAULT 0,
-    image_url VARCHAR(255) DEFAULT NULL
+    image_url VARCHAR(255) DEFAULT NULL,
+    UNIQUE KEY unique_city_country (name, country)
 );
 
 -- Activities (linked to cities)
@@ -129,19 +130,19 @@ CREATE TABLE IF NOT EXISTS trip_notes (
 -- Seed Data
 -- ============================================================
 
-INSERT IGNORE INTO cities (name, country, region, cost_index, popularity) VALUES
-('Paris', 'France', 'Europe', 3.50, 95),
-('Tokyo', 'Japan', 'Asia', 3.20, 92),
-('New York', 'USA', 'North America', 4.00, 90),
-('Bali', 'Indonesia', 'Asia', 1.50, 88),
-('London', 'UK', 'Europe', 3.80, 87),
-('Rome', 'Italy', 'Europe', 2.80, 85),
-('Bangkok', 'Thailand', 'Asia', 1.20, 84),
-('Dubai', 'UAE', 'Middle East', 3.60, 83),
-('Barcelona', 'Spain', 'Europe', 2.60, 82),
-('Sydney', 'Australia', 'Oceania', 3.40, 80),
-('Mumbai', 'India', 'Asia', 1.00, 78),
-('Cape Town', 'South Africa', 'Africa', 1.80, 75);
+INSERT IGNORE INTO cities (name, country, region, cost_index, popularity, image_url) VALUES
+('Paris', 'France', 'Europe', 3.50, 95, 'images/cities/paris.jpg'),
+('Tokyo', 'Japan', 'Asia', 3.20, 92, 'images/cities/tokyo.avif'),
+('New York', 'USA', 'North America', 4.00, 90, 'images/cities/new-york.jpg'),
+('Bali', 'Indonesia', 'Asia', 1.50, 88, 'images/cities/bali.jpg'),
+('London', 'UK', 'Europe', 3.80, 87, 'images/cities/london.jpg'),
+('Rome', 'Italy', 'Europe', 2.80, 85, 'images/cities/rome.jpg'),
+('Bangkok', 'Thailand', 'Asia', 1.20, 84, 'images/cities/bangkok.jpg'),
+('Dubai', 'UAE', 'Middle East', 3.60, 83, 'images/cities/dubai.avif'),
+('Barcelona', 'Spain', 'Europe', 2.60, 82, 'images/cities/barcelona.jpg'),
+('Sydney', 'Australia', 'Oceania', 3.40, 80, 'images/cities/sydeny.jpg'),
+('Mumbai', 'India', 'Asia', 1.00, 78, 'images/cities/mumbai.jpg'),
+('Cape Town', 'South Africa', 'Africa', 1.80, 75, 'images/cities/cape-twon.jpg');
 
 INSERT IGNORE INTO activities (city_id, name, category, cost, duration_hours, description) VALUES
 (1, 'Eiffel Tower Visit', 'sightseeing', 25.00, 2.0, 'Visit the iconic Eiffel Tower'),

@@ -80,11 +80,14 @@
                 <div class="row g-2">
                     {% for city in popular_cities %}
                     <div class="col-6">
-                        <div class="border rounded p-2 text-center small trip-card">
-                            <div class="fw-semibold">{{ city.name }}</div>
-                            <div class="text-muted">{{ city.country }}</div>
-                            <div class="text-warning">
-                                {% for i in range([(city.popularity // 20)|int, 5]|min) %}★{% endfor %}
+                        <div class="border rounded overflow-hidden trip-card" style="height:100px;">
+                            {% if city.image_url %}
+                            <img src="{{ url_for('static', filename=city.image_url) }}"
+                                 style="width:100%;height:60px;object-fit:cover;">
+                            {% endif %}
+                            <div class="p-1 text-center">
+                                <div class="fw-semibold small">{{ city.name }}</div>
+                                <div class="text-muted" style="font-size:0.7rem;">{{ city.country }}</div>
                             </div>
                         </div>
                     </div>

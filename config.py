@@ -8,4 +8,4 @@ class Config:
     MYSQL_DB = os.environ.get('MYSQL_DB', 'traveloop')
     MYSQL_CURSORCLASS = 'DictCursor'
     UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'images')
-    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB max upload
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB max upload
