@@ -1,19 +1,30 @@
 {% extends 'base.html' %}
-{% block title %}Activities – Traveloop{% endblock %}
+{% block title %}Activities - Traveloop{% endblock %}
 {% block content %}
-<div class="page-header">
-    <h4><i class="bi bi-binoculars me-2"></i>Browse Activities</h4>
-    <a href="{{ url_for('search.search_cities') }}" class="btn btn-outline-secondary btn-sm">Back to Cities</a>
-</div>
+<section class="trips-hero mb-4">
+    <div>
+        <span class="hero-kicker">
+            <i class="bi bi-binoculars"></i>
+            Activity ideas
+        </span>
+        <h1>Browse Activities</h1>
+        <p>Search activities by city and category, then use them as inspiration while building your itinerary.</p>
+    </div>
+    <a href="{{ url_for('search.search_cities') }}" class="btn btn-light">
+        <i class="bi bi-arrow-left me-1"></i>Back to Cities
+    </a>
+</section>
 
-<div class="card mb-4">
+<section class="card search-filter-card mb-4">
     <div class="card-body">
-        <form method="GET" class="row g-2">
+        <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-4">
-                <input type="text" name="q" class="form-control" placeholder="Search activity..." value="{{ query }}">
+                <label class="form-label fw-semibold small" for="q">Search Activity</label>
+                <input type="text" id="q" name="q" class="form-control" placeholder="Search activity..." value="{{ query }}">
             </div>
             <div class="col-md-3">
-                <select name="city_id" class="form-select">
+                <label class="form-label fw-semibold small" for="city_id">City</label>
+                <select id="city_id" name="city_id" class="form-select">
                     <option value="">All Cities</option>
                     {% for city in cities %}
                     <option value="{{ city.id }}" {% if city.id|string == selected_city %}selected{% endif %}>
@@ -23,7 +34,8 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <select name="category" class="form-select">
+                <label class="form-label fw-semibold small" for="category">Category</label>
+                <select id="category" name="category" class="form-select">
                     <option value="">All Categories</option>
                     {% for cat in categories %}
                     <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>
@@ -33,41 +45,44 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel me-1"></i>Filter
+                </button>
             </div>
         </form>
     </div>
-</div>
+</section>
 
-<div class="row g-3">
+<div class="row g-4">
     {% for act in activities %}
-    <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h6 class="fw-bold mb-0">{{ act.name }}</h6>
-                    <span class="badge bg-secondary">{{ act.category }}</span>
-                </div>
-                <p class="text-muted small mb-1"><i class="bi bi-geo-alt me-1"></i>{{ act.city_name }}</p>
-                <p class="text-muted small mb-1"><i class="bi bi-clock me-1"></i>{{ act.duration_hours }}h</p>
-                <p class="text-success fw-semibold mb-2">${{ "%.2f"|format(act.cost) }}</p>
-                {% if act.description %}
-                <p class="text-muted small">{{ act.description }}</p>
-                {% endif %}
+    <div class="col-md-6 col-xl-4">
+        <article class="activity-card h-100">
+            <div class="activity-card-top">
+                <span class="activity-icon"><i class="bi bi-stars"></i></span>
+                <span class="badge bg-light text-dark border">{{ act.category }}</span>
             </div>
-        </div>
+            <div class="activity-card-body">
+                <h2>{{ act.name }}</h2>
+                <div class="trip-card-meta">
+                    <span><i class="bi bi-geo-alt"></i>{{ act.city_name }}</span>
+                    <span><i class="bi bi-clock"></i>{{ act.duration_hours }}h</span>
+                </div>
+                {% if act.description %}
+                <p>{{ act.description }}</p>
+                {% endif %}
+                <div class="activity-cost">${{ "%.2f"|format(act.cost) }}</div>
+            </div>
+        </article>
     </div>
     {% else %}
     <div class="col-12">
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="bi bi-binoculars text-muted" style="font-size:4rem;"></i>
-                <h5 class="mt-3 text-muted">No activities found</h5>
-                <p class="text-muted small">Try a different city, category or search term.</p>
-                <a href="{{ url_for('search.search_activities') }}" class="btn btn-outline-primary mt-2">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filters
-                </a>
-            </div>
+        <div class="empty-state page-empty">
+            <span class="empty-icon"><i class="bi bi-binoculars"></i></span>
+            <h3>No activities found</h3>
+            <p>Try a different city, category, or search term.</p>
+            <a href="{{ url_for('search.search_activities') }}" class="btn btn-primary">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filters
+            </a>
         </div>
     </div>
     {% endfor %}

@@ -1,22 +1,28 @@
 {% extends 'base.html' %}
-{% block title %}Explore Cities – Traveloop{% endblock %}
+{% block title %}Explore Cities - Traveloop{% endblock %}
 {% block content %}
-<div class="page-header">
-    <h4><i class="bi bi-globe me-2"></i>Explore Cities</h4>
-</div>
+<section class="trips-hero mb-4">
+    <div>
+        <span class="hero-kicker">
+            <i class="bi bi-globe"></i>
+            Destination discovery
+        </span>
+        <h1>Explore Cities</h1>
+        <p>Find destinations by city or region, compare cost index, and open activity ideas for your next itinerary.</p>
+    </div>
+</section>
 
-<!-- Search Bar — fully client side, no page refresh -->
-<div class="card mb-4">
+<section class="card search-filter-card mb-4">
     <div class="card-body">
-        <div class="row g-2 align-items-end">
+        <div class="row g-3 align-items-end">
             <div class="col-md-5">
-                <label class="form-label fw-semibold small">Search City</label>
+                <label class="form-label fw-semibold small" for="citySearchInput">Search City</label>
                 <input type="text" id="citySearchInput" class="form-control"
                        placeholder="e.g. Paris, Tokyo..." autocomplete="off"
                        value="{{ query }}">
             </div>
             <div class="col-md-4">
-                <label class="form-label fw-semibold small">Filter by Region</label>
+                <label class="form-label fw-semibold small" for="regionFilter">Filter by Region</label>
                 <select id="regionFilter" class="form-select">
                     <option value="">All Regions</option>
                     {% for r in regions | sort %}
@@ -24,55 +30,56 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-2">
-                <button onclick="clearFilters()" class="btn btn-outline-secondary w-100">
-                    <i class="bi bi-x-lg me-1"></i>Clear
+            <div class="col-md-3">
+                <button onclick="clearFilters()" class="btn btn-light w-100">
+                    <i class="bi bi-x-lg me-1"></i>Clear Filters
                 </button>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- Results Grid — updated by JS -->
-<div id="cityGrid" class="row g-3">
+<div id="cityGrid" class="row g-4">
     {% for city in cities %}
-    <div class="col-md-4 col-lg-3 city-card-col"
+    <div class="col-md-6 col-xl-4 city-card-col"
          data-name="{{ city.name | lower }}"
          data-region="{{ city.region | lower }}">
-        <div class="card trip-card h-100 overflow-hidden">
-            {% if city.image_url %}
-            <img src="{{ url_for('static', filename=city.image_url) }}"
-                 style="width:100%;height:160px;object-fit:cover;" loading="lazy">
-            {% else %}
-            <div style="width:100%;height:160px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:2rem;">🌍</div>
-            {% endif %}
-            <div class="card-body text-center">
-                <h6 class="fw-bold">{{ city.name }}</h6>
-                <p class="text-muted small mb-1">{{ city.country }}</p>
-                <p class="text-muted small mb-1"><i class="bi bi-geo me-1"></i>{{ city.region }}</p>
-                <span class="badge bg-light text-dark">Cost Index: {{ city.cost_index }}</span>
+        <article class="discover-card h-100">
+            <div class="discover-media">
+                {% if city.image_url %}
+                <img src="{{ url_for('static', filename=city.image_url) }}" alt="{{ city.name }}" loading="lazy">
+                {% else %}
+                <div class="discover-fallback">{{ city.name[:1] }}</div>
+                {% endif %}
+                <span class="discover-badge">{{ city.region }}</span>
+            </div>
+            <div class="discover-body">
+                <div>
+                    <h2>{{ city.name }}</h2>
+                    <p><i class="bi bi-geo-alt me-1"></i>{{ city.country }}</p>
+                </div>
+                <div class="discover-meta">
+                    <span>Cost Index</span>
+                    <strong>{{ city.cost_index }}</strong>
+                </div>
                 <a href="{{ url_for('search.search_activities', city_id=city.id) }}"
-                   class="btn btn-sm btn-outline-primary mt-2 w-100">
+                   class="btn btn-primary w-100">
                     <i class="bi bi-binoculars me-1"></i>View Activities
                 </a>
             </div>
-        </div>
+        </article>
     </div>
     {% endfor %}
 </div>
 
-<!-- Empty state (hidden by default, shown by JS) -->
-<div id="emptyState" class="card" style="display:none;">
-    <div class="card-body text-center py-5">
-        <i class="bi bi-globe text-muted" style="font-size:4rem;"></i>
-        <h5 class="mt-3 text-muted" id="emptyMsg">No cities found</h5>
-        <p class="text-muted small">Try a different search term or region.</p>
-        <button onclick="clearFilters()" class="btn btn-outline-primary mt-2">
-            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Search
-        </button>
-    </div>
+<div id="emptyState" class="empty-state page-empty mt-4" style="display:none;">
+    <span class="empty-icon"><i class="bi bi-globe2"></i></span>
+    <h3 id="emptyMsg">No cities found</h3>
+    <p>Try a different search term or region.</p>
+    <button onclick="clearFilters()" class="btn btn-primary">
+        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Search
+    </button>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
@@ -116,11 +123,8 @@ function clearFilters() {
     filterCities();
 }
 
-// Instant filter — no debounce needed since it's all client-side
 searchInput.addEventListener('input', filterCities);
 regionFilter.addEventListener('change', filterCities);
-
-// Run on load in case URL had query params
 filterCities();
 </script>
 {% endblock %}

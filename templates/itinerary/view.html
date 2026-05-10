@@ -1,241 +1,166 @@
 {% extends 'base.html' %}
-{% block title %}{{ trip.name }} – Itinerary & Budget{% endblock %}
+{% block title %}{{ trip.name }} - Itinerary & Budget{% endblock %}
 {% block content %}
-
-<!-- Header -->
-<div class="page-header">
+<section class="trip-detail-hero mb-4">
     <div>
-        <h4><i class="bi bi-calendar3 me-2"></i>{{ trip.name }}</h4>
-        <small class="text-muted">
-            <i class="bi bi-geo-alt me-1"></i>{{ trip.destination }}
-            &nbsp;|&nbsp;
-            <i class="bi bi-calendar-range me-1"></i>{{ trip.start_date }} → {{ trip.end_date }}
-            &nbsp;|&nbsp;
-            <span class="badge badge-{{ trip.status }} text-white">{{ trip.status }}</span>
-        </small>
+        <span class="hero-kicker">
+            <i class="bi bi-signpost-split"></i>
+            Itinerary and budget
+        </span>
+        <h1>{{ trip.name }}</h1>
+        <p>
+            {{ trip.destination }} · {{ trip.start_date }} to {{ trip.end_date }}
+            <span class="badge badge-{{ trip.status }} text-white rounded-pill ms-2">{{ trip.status }}</span>
+        </p>
     </div>
-    <div class="d-flex gap-2">
-        <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}" class="btn btn-primary btn-sm">
+    <div class="trip-detail-actions">
+        <div class="currency-control">
+            <label for="currencySelector">Display currency</label>
+            <select id="currencySelector" class="form-select form-select-sm" data-currency-selector>
+                <option value="USD">USD</option>
+                <option value="INR">INR</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="JPY">JPY</option>
+                <option value="AUD">AUD</option>
+            </select>
+        </div>
+        <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}" class="btn btn-primary">
             <i class="bi bi-pencil me-1"></i>Edit Itinerary
         </a>
-        <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="btn btn-outline-secondary btn-sm">
+        <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="btn btn-light">
             <i class="bi bi-arrow-left me-1"></i>Back
         </a>
     </div>
-</div>
+</section>
 
-<!-- Top Stats Row -->
 <div class="row g-3 mb-4">
-    <div class="col-6 col-md-2">
-        <div class="stat-card blue text-center">
-            <div class="fs-4 fw-bold">{{ days|length }}</div>
-            <div class="small">Days</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-2">
-        <div class="stat-card amber text-center">
-            <div class="fs-4 fw-bold">
-                {% set ta = namespace(count=0) %}
-                {% for day in days %}{% set ta.count = ta.count + day['items']|length %}{% endfor %}
-                {{ ta.count }}
-            </div>
-            <div class="small">Activities</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-2">
-        <div class="stat-card blue text-center">
-            <div class="fs-4 fw-bold">${{ "%.0f"|format(trip.total_budget) }}</div>
-            <div class="small">Budget</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-2">
-        <div class="stat-card green text-center">
-            <div class="fs-4 fw-bold">${{ "%.0f"|format(total_cost) }}</div>
-            <div class="small">Planned</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-2">
-        <div class="stat-card red text-center">
-            <div class="fs-4 fw-bold">${{ "%.0f"|format(total_spent) }}</div>
-            <div class="small">Spent</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-2">
-        <div class="stat-card {% if remaining >= 0 %}green{% else %}red{% endif %} text-center">
-            <div class="fs-4 fw-bold">${{ "%.0f"|format(remaining) }}</div>
-            <div class="small">Remaining</div>
-        </div>
-    </div>
+    {% set ta = namespace(count=0) %}
+    {% for day in days %}{% set ta.count = ta.count + day['items']|length %}{% endfor %}
+    <div class="col-6 col-md-4 col-xl-2"><div class="dashboard-stat-card"><span class="stat-icon"><i class="bi bi-calendar3"></i></span><div class="stat-value">{{ days|length }}</div><div class="stat-label">Days</div></div></div>
+    <div class="col-6 col-md-4 col-xl-2"><div class="dashboard-stat-card"><span class="stat-icon"><i class="bi bi-stars"></i></span><div class="stat-value">{{ ta.count }}</div><div class="stat-label">Activities</div></div></div>
+    <div class="col-6 col-md-4 col-xl-2"><div class="dashboard-stat-card"><span class="stat-icon"><i class="bi bi-wallet2"></i></span><div class="stat-value money" data-money="{{ '%.2f'|format(trip.total_budget) }}">${{ "%.0f"|format(trip.total_budget) }}</div><div class="stat-label">Budget</div></div></div>
+    <div class="col-6 col-md-4 col-xl-2"><div class="dashboard-stat-card"><span class="stat-icon"><i class="bi bi-clipboard-check"></i></span><div class="stat-value money" data-money="{{ '%.2f'|format(total_cost) }}">${{ "%.0f"|format(total_cost) }}</div><div class="stat-label">Planned</div></div></div>
+    <div class="col-6 col-md-4 col-xl-2"><div class="dashboard-stat-card"><span class="stat-icon"><i class="bi bi-receipt"></i></span><div class="stat-value money" data-money="{{ '%.2f'|format(total_spent) }}">${{ "%.0f"|format(total_spent) }}</div><div class="stat-label">Spent</div></div></div>
+    <div class="col-6 col-md-4 col-xl-2"><div class="dashboard-stat-card"><span class="stat-icon"><i class="bi bi-cash-coin"></i></span><div class="stat-value money" data-money="{{ '%.2f'|format(remaining) }}">${{ "%.0f"|format(remaining) }}</div><div class="stat-label">Remaining</div></div></div>
 </div>
 
-<!-- Budget Progress Bar -->
 {% if trip.total_budget > 0 %}
-<div class="card mb-4">
-    <div class="card-body py-2">
-        <div class="d-flex justify-content-between mb-1">
-            <small class="fw-semibold text-muted">Budget Used</small>
-            <small class="fw-semibold">{{ "%.1f"|format((total_spent / trip.total_budget * 100)|float) }}%</small>
+<section class="card search-filter-card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between mb-2">
+            <span class="budget-label">Budget used</span>
+            <span class="budget-value">{{ "%.1f"|format((total_spent / trip.total_budget * 100)|float) }}%</span>
         </div>
-        <div class="progress" style="height:10px;border-radius:5px;">
-            <div class="progress-bar {% if total_spent > trip.total_budget %}bg-danger{% else %}bg-success{% endif %}"
+        <div class="progress trip-progress">
+            <div class="progress-bar {% if total_spent > trip.total_budget %}bg-danger{% else %}bg-primary{% endif %}"
                  style="width:{{ [((total_spent / trip.total_budget) * 100)|int, 100]|min }}%"></div>
         </div>
     </div>
-</div>
+</section>
 {% endif %}
 
-<!-- Tab Navigation -->
-<ul class="nav nav-tabs mb-4" id="mainTabs">
+<ul class="nav nav-pills filter-pills mb-4" id="mainTabs">
     <li class="nav-item">
-        <a class="nav-link active fw-semibold" data-bs-toggle="tab" href="#itinerary-tab">
+        <a class="filter-pill active" data-bs-toggle="tab" href="#itinerary-tab">
             <i class="bi bi-calendar3 me-1"></i>Itinerary
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link fw-semibold" data-bs-toggle="tab" href="#budget-tab" id="budget">
+        <a class="filter-pill" data-bs-toggle="tab" href="#budget-tab" id="budget">
             <i class="bi bi-wallet2 me-1"></i>Budget & Expenses
         </a>
     </li>
 </ul>
 
 <div class="tab-content">
-
-    <!-- ===== ITINERARY TAB ===== -->
     <div class="tab-pane fade show active" id="itinerary-tab">
         {% if days %}
         <div class="row g-4">
-            <!-- Timeline -->
             <div class="col-lg-8">
-                {% for day in days %}
-                <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center"
-                         style="background:linear-gradient(135deg,#1e3a5f,#2563eb);">
-                        <div>
-                            <span class="fw-bold text-white">
-                                <i class="bi bi-calendar-day me-2"></i>Day {{ day.day_number }}
-                            </span>
-                            <span class="text-white-50 ms-2 small">{{ day.day_date }}</span>
-                            {% if day.city %}
-                            <span class="badge bg-white text-primary ms-2">
-                                <i class="bi bi-geo-alt me-1"></i>{{ day.city }}
-                            </span>
+                <div class="builder-day-list">
+                    {% for day in days %}
+                    <section class="card builder-day-card">
+                        <div class="card-header builder-day-header">
+                            <div>
+                                <span class="day-number">Day {{ day.day_number }}</span>
+                                <h2>{{ day.day_date }}</h2>
+                                {% if day.city %}<span class="day-city"><i class="bi bi-geo-alt me-1"></i>{{ day.city }}</span>{% endif %}
+                            </div>
+                            <span class="badge bg-light text-dark border money" data-money="{{ '%.2f'|format(day.day_total) }}">${{ "%.0f"|format(day.day_total) }}</span>
+                        </div>
+                        <div class="card-body">
+                            {% if day['items'] %}
+                            <div class="timeline-activity-list">
+                                {% for item in day['items'] %}
+                                <article class="timeline-activity">
+                                    <div>
+                                        <h3>{{ item.title }}</h3>
+                                        {% if item.start_time %}
+                                        <small><i class="bi bi-clock me-1"></i>{{ item.start_time }}{% if item.end_time %} to {{ item.end_time }}{% endif %}</small>
+                                        {% endif %}
+                                        {% if item.description %}<p class="mb-0 mt-1 text-muted small">{{ item.description }}</p>{% endif %}
+                                        <span class="badge bg-light text-dark border mt-2">{{ item.category|capitalize }}</span>
+                                    </div>
+                                    <span class="money" data-money="{{ '%.2f'|format(item.cost) }}">${{ "%.2f"|format(item.cost) }}</span>
+                                </article>
+                                {% endfor %}
+                            </div>
+                            <div class="day-total-row">
+                                <span>Day {{ day.day_number }} total</span>
+                                <strong class="money" data-money="{{ '%.2f'|format(day.day_total) }}">${{ "%.2f"|format(day.day_total) }}</strong>
+                            </div>
+                            {% else %}
+                            <p class="timeline-empty">No activities planned.</p>
                             {% endif %}
                         </div>
-                        <span class="badge bg-warning text-dark fw-semibold">
-                            ${{ "%.0f"|format(day.day_total) }}
-                        </span>
-                    </div>
-                    <div class="card-body p-0">
-                        {% if day['items'] %}
-                        <div class="list-group list-group-flush">
-                            {% for item in day['items'] %}
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="d-flex gap-3 align-items-start">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                                             style="width:38px;height:38px;background:#eff6ff;">
-                                            {% if item.category == 'food' %}<i class="bi bi-cup-hot text-primary"></i>
-                                            {% elif item.category == 'transport' %}<i class="bi bi-car-front text-primary"></i>
-                                            {% elif item.category == 'accommodation' %}<i class="bi bi-building text-primary"></i>
-                                            {% elif item.category == 'sightseeing' %}<i class="bi bi-binoculars text-primary"></i>
-                                            {% elif item.category == 'adventure' %}<i class="bi bi-lightning text-primary"></i>
-                                            {% elif item.category == 'leisure' %}<i class="bi bi-umbrella text-primary"></i>
-                                            {% else %}<i class="bi bi-star text-primary"></i>{% endif %}
-                                        </div>
-                                        <div>
-                                            <div class="fw-semibold">{{ item.title }}</div>
-                                            {% if item.start_time %}
-                                            <small class="text-muted">
-                                                <i class="bi bi-clock me-1"></i>{{ item.start_time }}
-                                                {% if item.end_time %} – {{ item.end_time }}{% endif %}
-                                            </small>
-                                            {% endif %}
-                                            {% if item.description %}
-                                            <div class="text-muted small mt-1">{{ item.description }}</div>
-                                            {% endif %}
-                                            <span class="badge bg-light text-dark border mt-1 small">
-                                                {{ item.category|capitalize }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <span class="fw-bold text-success flex-shrink-0 ms-3">
-                                        ${{ "%.2f"|format(item.cost) }}
-                                    </span>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <div class="px-3 py-2 bg-light d-flex justify-content-between border-top">
-                            <small class="text-muted fw-semibold">Day {{ day.day_number }} Total</small>
-                            <small class="fw-bold text-primary">${{ "%.2f"|format(day.day_total) }}</small>
-                        </div>
-                        {% else %}
-                        <div class="text-center py-3 text-muted small">
-                            <i class="bi bi-calendar-x me-1"></i>No activities planned.
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-                <div class="card border-primary">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <span class="fw-bold"><i class="bi bi-calculator me-2 text-primary"></i>Total Planned Cost</span>
-                        <span class="fw-bold fs-5 text-primary">${{ "%.2f"|format(total_cost) }}</span>
-                    </div>
+                    </section>
+                    {% endfor %}
                 </div>
             </div>
 
-            <!-- Itinerary Sidebar -->
             <div class="col-lg-4">
                 {% if category_totals %}
-                <div class="card mb-4">
+                <section class="card trip-summary-card mb-4">
                     <div class="card-header"><i class="bi bi-pie-chart me-2"></i>Cost by Category</div>
-                    <div class="card-body" style="height:220px;">
-                        <canvas id="costChart"></canvas>
-                    </div>
-                </div>
+                    <div class="card-body chart-box"><canvas id="costChart"></canvas></div>
+                </section>
                 {% endif %}
-                <div class="card">
+                <section class="card trip-summary-card">
                     <div class="card-header"><i class="bi bi-list-ul me-2"></i>Day Summary</div>
                     <div class="list-group list-group-flush">
                         {% for day in days %}
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="fw-semibold small">Day {{ day.day_number }}</div>
-                                <div class="text-muted" style="font-size:0.75rem;">
-                                    {{ day.day_date }}{% if day.city %} · {{ day.city }}{% endif %}
-                                </div>
+                                <div class="text-muted small">{{ day.day_date }}{% if day.city %} · {{ day.city }}{% endif %}</div>
                             </div>
                             <div class="text-end">
-                                <div class="fw-semibold small text-primary">${{ "%.0f"|format(day.day_total) }}</div>
-                                <div class="text-muted" style="font-size:0.75rem;">{{ day['items']|length }} activities</div>
+                                <div class="fw-semibold small text-primary money" data-money="{{ '%.2f'|format(day.day_total) }}">${{ "%.0f"|format(day.day_total) }}</div>
+                                <div class="text-muted small">{{ day['items']|length }} activities</div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
-                </div>
+                </section>
             </div>
         </div>
-
         {% else %}
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="bi bi-calendar-plus text-muted" style="font-size:4rem;"></i>
-                <h5 class="mt-3 text-muted">No itinerary built yet</h5>
-                <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}" class="btn btn-primary mt-2">
-                    <i class="bi bi-plus-circle me-2"></i>Build Itinerary
-                </a>
-            </div>
+        <div class="empty-state page-empty">
+            <span class="empty-icon"><i class="bi bi-calendar-plus"></i></span>
+            <h3>No itinerary built yet</h3>
+            <p>Add days and activities to create a complete travel plan.</p>
+            <a href="{{ url_for('itinerary.builder', trip_id=trip.id) }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i>Build Itinerary
+            </a>
         </div>
         {% endif %}
     </div>
 
-    <!-- ===== BUDGET TAB ===== -->
     <div class="tab-pane fade" id="budget-tab">
         <div class="row g-4">
-            <!-- Add Expense Form -->
             <div class="col-lg-4">
-                <div class="card">
+                <section class="card trip-summary-card">
                     <div class="card-header"><i class="bi bi-plus-circle me-2"></i>Add Expense</div>
                     <div class="card-body">
                         <form method="POST" action="{{ url_for('itinerary.add_expense', trip_id=trip.id) }}" novalidate>
@@ -244,7 +169,7 @@
                                 <input type="text" name="title" class="form-control" placeholder="e.g. Hotel booking" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Amount ($) *</label>
+                                <label class="form-label fw-semibold">Amount *</label>
                                 <input type="number" name="amount" class="form-control" placeholder="0.00" min="0" step="0.01" required>
                             </div>
                             <div class="mb-3">
@@ -269,50 +194,41 @@
                             <button type="submit" class="btn btn-primary w-100">Add Expense</button>
                         </form>
                     </div>
-                </div>
+                </section>
             </div>
 
-            <!-- Expense Chart + Log -->
             <div class="col-lg-8">
                 {% if by_category %}
-                <div class="card mb-4">
+                <section class="card trip-summary-card mb-4">
                     <div class="card-header"><i class="bi bi-pie-chart me-2"></i>Spending by Category</div>
-                    <div class="card-body" style="height:240px;">
-                        <canvas id="expenseChart"></canvas>
-                    </div>
-                </div>
+                    <div class="card-body chart-box"><canvas id="expenseChart"></canvas></div>
+                </section>
                 {% endif %}
 
-                <div class="card">
+                <section class="card trip-summary-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-receipt me-2"></i>Expense Log</span>
-                        <span class="badge bg-danger">Total: ${{ "%.2f"|format(total_spent) }}</span>
+                        <span class="badge bg-danger">Total: <span class="money" data-money="{{ '%.2f'|format(total_spent) }}">${{ "%.2f"|format(total_spent) }}</span></span>
                     </div>
                     <div class="card-body p-0">
                         {% if expenses %}
                         <div class="table-responsive">
-                            <table class="table table-hover mb-0">
+                            <table class="table table-hover mb-0 align-middle">
                                 <thead class="table-light">
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Category</th>
-                                        <th>Date</th>
-                                        <th>Amount</th>
-                                        <th></th>
-                                    </tr>
+                                    <tr><th>Title</th><th>Category</th><th>Date</th><th>Amount</th><th></th></tr>
                                 </thead>
                                 <tbody>
                                     {% for e in expenses %}
                                     <tr>
                                         <td class="fw-semibold">{{ e.title }}</td>
-                                        <td><span class="badge bg-secondary">{{ e.category }}</span></td>
-                                        <td class="text-muted small">{{ e.expense_date or '—' }}</td>
-                                        <td class="fw-semibold text-danger">${{ "%.2f"|format(e.amount) }}</td>
+                                        <td><span class="badge bg-light text-dark border">{{ e.category }}</span></td>
+                                        <td class="text-muted small">{{ e.expense_date or '-' }}</td>
+                                        <td class="fw-semibold text-danger money" data-money="{{ '%.2f'|format(e.amount) }}">${{ "%.2f"|format(e.amount) }}</td>
                                         <td>
                                             <form method="POST"
                                                   action="{{ url_for('itinerary.delete_expense', trip_id=trip.id, expense_id=e.id) }}"
                                                   data-confirm="Delete this expense?">
-                                                <button class="btn btn-sm btn-outline-danger">
+                                                <button class="btn btn-sm btn-light text-danger" aria-label="Delete expense">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
@@ -323,23 +239,22 @@
                             </table>
                         </div>
                         {% else %}
-                        <div class="text-center py-4 text-muted">
-                            <i class="bi bi-receipt fs-2"></i>
-                            <p class="mt-2 small">No expenses recorded yet.</p>
+                        <div class="empty-state compact">
+                            <span class="empty-icon"><i class="bi bi-receipt"></i></span>
+                            <h3>No expenses recorded yet</h3>
+                            <p>Add your first expense to compare planned and actual spending.</p>
                         </div>
                         {% endif %}
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </div>
-
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Switch to budget tab if URL has #budget
 if (window.location.hash === '#budget') {
     var tab = document.querySelector('a[href="#budget-tab"]');
     if (tab) bootstrap.Tab.getOrCreateInstance(tab).show();
@@ -351,7 +266,7 @@ new Chart(document.getElementById('costChart'), {
     data: {
         labels: {{ category_totals.keys() | list | tojson }},
         datasets: [{ data: {{ category_totals.values() | list | tojson }},
-            backgroundColor: ['#2563eb','#f59e0b','#10b981','#ef4444','#8b5cf6','#6b7280','#ec4899'] }]
+            backgroundColor: ['#0a84ff','#63b3ff','#10b981','#ef4444','#8b5cf6','#64748b','#ec4899'] }]
     },
     options: { responsive: true, maintainAspectRatio: false,
                plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
@@ -364,7 +279,7 @@ new Chart(document.getElementById('expenseChart'), {
     data: {
         labels: {{ by_category | map(attribute='category') | list | tojson }},
         datasets: [{ data: {{ by_category | map(attribute='total') | list | tojson }},
-            backgroundColor: ['#2563eb','#f59e0b','#10b981','#ef4444','#8b5cf6','#6b7280'] }]
+            backgroundColor: ['#0a84ff','#63b3ff','#10b981','#ef4444','#8b5cf6','#64748b'] }]
     },
     options: { responsive: true, maintainAspectRatio: false,
                plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
