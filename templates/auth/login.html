@@ -1,28 +1,45 @@
 {% extends 'base.html' %}
-{% block title %}Login – Traveloop{% endblock %}
+{% block title %}Login - Traveloop{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block main_class %}auth-main{% endblock %}
 {% block content %}
 <div class="auth-wrapper">
-    <div class="auth-card">
-        <div class="text-center mb-4">
-            <i class="bi bi-airplane-fill fs-1 text-primary"></i>
-            <h3 class="fw-bold mt-2" style="color:#1e3a5f;">Traveloop</h3>
-            <p class="text-muted small">Plan your journey, your way.</p>
+    <section class="auth-visual" aria-label="Traveloop welcome">
+        <div class="auth-visual-content">
+            <div class="auth-eyebrow">
+                <i class="bi bi-compass"></i>
+                Smart travel planning
+            </div>
+            <h1>Plan trips with less chaos.</h1>
+            <p>Build itineraries, track budgets, and keep every travel detail connected from the first idea to the final day.</p>
         </div>
-        <form method="POST" novalidate>
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Email</label>
-                <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+    </section>
+
+    <section class="auth-panel">
+        <div class="auth-card">
+            <div class="mb-4">
+                <span class="brand-mark mb-3">
+                    <i class="bi bi-airplane-fill"></i>
+                </span>
+                <h3 class="auth-title">Welcome back</h3>
+                <p class="auth-subtitle">Log in to continue planning your next route.</p>
             </div>
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Password</label>
-                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100 fw-semibold">Login</button>
-        </form>
-        <hr>
-        <p class="text-center mb-0 small">
-            Don't have an account? <a href="{{ url_for('auth.register') }}">Sign up</a>
-        </p>
-    </div>
+            <form method="POST" novalidate>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" autocomplete="email" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2">Login</button>
+            </form>
+            <hr class="auth-divider">
+            <p class="text-center mb-0 small">
+                Don't have an account? <a class="auth-link" href="{{ url_for('auth.register') }}">Create one</a>
+            </p>
+        </div>
+    </section>
 </div>
 {% endblock %}
