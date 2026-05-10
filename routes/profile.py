@@ -15,12 +15,16 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def upload_storage_is_read_only():
+    upload_folder = os.path.abspath(Config.UPLOAD_FOLDER)
+    app_root = os.path.abspath(os.getcwd())
+
     return (
         os.getenv('VERCEL') == '1'
         or bool(os.getenv('VERCEL_ENV'))
         or bool(os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
         or bool(os.getenv('LAMBDA_TASK_ROOT'))
-        or os.path.abspath(Config.UPLOAD_FOLDER).startswith('/var/task')
+        or upload_folder.startswith('/var/task')
+        or app_root.startswith('/var/task')
     )
 
 @profile_bp.route('/profile')
