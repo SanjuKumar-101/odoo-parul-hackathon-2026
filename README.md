@@ -129,8 +129,6 @@ Traveloop does not rely on third-party travel APIs. City, activity, itinerary, b
 For hackathon evaluation, an admin account is available to access and test the admin panel.
 
 **Admin Login**
-
-```text
 Email: admin@traveloop.com
 Password: admin123
 
